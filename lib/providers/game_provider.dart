@@ -15,9 +15,9 @@ class GameProvider extends ChangeNotifier {
 
   // --- Players Logic ---
 
-  Future<void> addPlayer(String name) async {
+  Future<void> addPlayer(String name, {bool isDefault = false}) async {
     final id = _uuid.v4();
-    final newPlayer = Player(id: id, name: name);
+    final newPlayer = Player(id: id, name: name, isDefault: isDefault);
     await _playerBox.put(id, newPlayer);
     notifyListeners();
   }
@@ -29,6 +29,18 @@ class GameProvider extends ChangeNotifier {
 
   Player? getPlayer(String id) {
     return _playerBox.get(id);
+  }
+
+  Future<void> setPlayerDefault(String id, bool isDefault) async {
+    final player = getPlayer(id);
+    if (player == null) return;
+    player.isDefault = isDefault;
+    await player.save();
+    notifyListeners();
+  }
+
+  List<String> getDefaultPlayerIds() {
+    return players.where((p) => p.isDefault).map((p) => p.id).toList();
   }
 
   // --- Game Logic ---
@@ -67,6 +79,14 @@ class GameProvider extends ChangeNotifier {
     if (_gameBox.isEmpty) return null;
     final sortedGames = games; // Utilise le getter trié
     return sortedGames.first;
+  }
+
+  List<String> getPreferredPlayerIds() {
+    final defaults = getDefaultPlayerIds();
+    if (defaults.isNotEmpty) return defaults;
+    final last = getLastGame();
+    if (last == null) return [];
+    return last.playersIds.where((id) => _playerBox.containsKey(id)).toList();
   }
 
   /// Ajoute un nouveau tour avec des scores optionnels (null par défaut)

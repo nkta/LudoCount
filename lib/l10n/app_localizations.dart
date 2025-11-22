@@ -32,8 +32,14 @@ class AppLocalizations {
       'gameTitleHint': 'Soirée Jeux...',
       'defaultGameTitle': 'Partie du {date}',
       'selectPlayers': 'Sélectionnez les joueurs',
+      'quickSelectDefaults': 'Sélectionner les joueurs par défaut ({count})',
+      'quickSelectLast':
+          'Pré-sélectionner les {count} joueurs de la dernière partie',
       'noPlayers': 'Aucun joueur disponible.',
       'createPlayers': 'Créer des joueurs',
+      'defaultPlayer': 'Sélection par défaut',
+      'markAsDefault': 'Marquer comme joueur par défaut',
+      'defaultBadge': 'Par défaut',
       'options': 'Options',
       'inverseScoring': 'Marquage inversé (le plus bas gagne)',
       'inverseScoringSubtitle': 'Ex: Golf, Skyjo...',
@@ -92,8 +98,13 @@ class AppLocalizations {
       'gameTitleHint': 'Game night...',
       'defaultGameTitle': 'Game on {date}',
       'selectPlayers': 'Select players',
+      'quickSelectDefaults': 'Select default players ({count})',
+      'quickSelectLast': 'Preselect last game\'s {count} players',
       'noPlayers': 'No players available.',
       'createPlayers': 'Create players',
+      'defaultPlayer': 'Default selection',
+      'markAsDefault': 'Mark as default player',
+      'defaultBadge': 'Default',
       'options': 'Options',
       'inverseScoring': 'Inverse scoring (lowest wins)',
       'inverseScoringSubtitle': 'Ex: Golf, Skyjo...',
@@ -151,8 +162,14 @@ class AppLocalizations {
       'gameTitleHint': 'Noche de juegos...',
       'defaultGameTitle': 'Partida del {date}',
       'selectPlayers': 'Seleccione los jugadores',
+      'quickSelectDefaults': 'Seleccionar jugadores por defecto ({count})',
+      'quickSelectLast':
+          'Preseleccionar los {count} jugadores de la última partida',
       'noPlayers': 'No hay jugadores disponibles.',
       'createPlayers': 'Crear jugadores',
+      'defaultPlayer': 'Selección por defecto',
+      'markAsDefault': 'Marcar como jugador por defecto',
+      'defaultBadge': 'Por defecto',
       'options': 'Opciones',
       'inverseScoring': 'Puntuación inversa (gana el menor)',
       'inverseScoringSubtitle': 'Ej.: Golf, Skyjo...',
@@ -210,8 +227,13 @@ class AppLocalizations {
       'gameTitleHint': 'Spielabend...',
       'defaultGameTitle': 'Spiel vom {date}',
       'selectPlayers': 'Spieler auswählen',
+      'quickSelectDefaults': 'Standardspieler auswählen ({count})',
+      'quickSelectLast': 'Letzte {count} Spieler vorauswählen',
       'noPlayers': 'Keine Spieler verfügbar.',
       'createPlayers': 'Spieler erstellen',
+      'defaultPlayer': 'Standardauswahl',
+      'markAsDefault': 'Als Standardspieler markieren',
+      'defaultBadge': 'Standard',
       'options': 'Optionen',
       'inverseScoring': 'Umgekehrte Wertung (niedrig gewinnt)',
       'inverseScoringSubtitle': 'z. B. Golf, Skyjo...',
@@ -278,8 +300,15 @@ class AppLocalizations {
   String defaultGameTitle(String date) =>
       _t('defaultGameTitle').replaceFirst('{date}', date);
   String get selectPlayers => _t('selectPlayers');
+  String quickSelectDefaults(int count) =>
+      _t('quickSelectDefaults').replaceFirst('{count}', '$count');
+  String quickSelectLast(int count) =>
+      _t('quickSelectLast').replaceFirst('{count}', '$count');
   String get noPlayers => _t('noPlayers');
   String get createPlayers => _t('createPlayers');
+  String get defaultPlayer => _t('defaultPlayer');
+  String get markAsDefault => _t('markAsDefault');
+  String get defaultBadge => _t('defaultBadge');
   String get options => _t('options');
   String get inverseScoring => _t('inverseScoring');
   String get inverseScoringSubtitle => _t('inverseScoringSubtitle');

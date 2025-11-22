@@ -31,9 +31,28 @@ class PlayerListScreen extends StatelessWidget {
                     child: Text(player.name[0].toUpperCase()),
                   ),
                   title: Text(player.name),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.redAccent),
-                    onPressed: () => _confirmDelete(context, provider, player),
+                  subtitle: player.isDefault
+                      ? Text(
+                          l10n.defaultBadge,
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                        )
+                      : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Checkbox(
+                        value: player.isDefault,
+                        onChanged: (value) {
+                          provider.setPlayerDefault(player.id, value ?? false);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.redAccent),
+                        onPressed: () =>
+                            _confirmDelete(context, provider, player),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -52,15 +71,30 @@ class PlayerListScreen extends StatelessWidget {
   void _showAddPlayerDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
+    bool defaultChecked = false;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.newPlayer),
-        content: TextField(
-          controller: controller,
-          decoration: InputDecoration(labelText: l10n.name),
-          autofocus: true,
-          textCapitalization: TextCapitalization.words,
+        content: StatefulBuilder(
+          builder: (context, setState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(labelText: l10n.name),
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: defaultChecked,
+                onChanged: (val) =>
+                    setState(() => defaultChecked = val ?? false),
+                title: Text(l10n.markAsDefault),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -70,8 +104,9 @@ class PlayerListScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
-                Provider.of<GameProvider>(context, listen: false)
-                    .addPlayer(controller.text.trim());
+                Provider.of<GameProvider>(context, listen: false).addPlayer(
+                    controller.text.trim(),
+                    isDefault: defaultChecked);
                 Navigator.pop(ctx);
               }
             },

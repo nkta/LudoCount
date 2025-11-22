@@ -10,5 +10,12 @@ class Player extends HiveObject {
   @HiveField(1)
   String name;
 
-  Player({required this.id, required this.name});
+  @HiveField(2)
+  bool isDefault;
+
+  Player({
+    required this.id,
+    required this.name,
+    this.isDefault = false,
+  });
 }

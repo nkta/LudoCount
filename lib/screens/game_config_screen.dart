@@ -16,6 +16,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
   final _maxScoreController = TextEditingController();
   final _maxRoundsController = TextEditingController();
   final List<String> _selectedPlayerIds = [];
+  bool _initializedSelection = false;
   bool _isInverseScore = false;
 
   @override
@@ -31,6 +32,17 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
     final l10n = AppLocalizations.of(context);
     final provider = Provider.of<GameProvider>(context);
     final players = provider.players;
+    final defaultIds = provider.getDefaultPlayerIds();
+    final preferredIds =
+        defaultIds.isNotEmpty ? defaultIds : provider.getPreferredPlayerIds();
+    final bool usesDefaultPreset = defaultIds.isNotEmpty;
+
+    if (!_initializedSelection && preferredIds.isNotEmpty) {
+      _selectedPlayerIds
+        ..clear()
+        ..addAll(preferredIds);
+      _initializedSelection = true;
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.newGameTitle)),
@@ -73,32 +85,36 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                 ),
               )
             else
-              Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children: players.map((player) {
-                  final isSelected = _selectedPlayerIds.contains(player.id);
-                  return FilterChip(
-                    label: Text(player.name),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _selectedPlayerIds.add(player.id);
-                        } else {
-                          _selectedPlayerIds.remove(player.id);
-                        }
-                      });
-                    },
-                    selectedColor: Theme.of(context).primaryColor,
-                    checkmarkColor: Colors.white,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.white70,
-                    ),
-                  );
-                }).toList(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: players.map((player) {
+                      final isSelected = _selectedPlayerIds.contains(player.id);
+                      return FilterChip(
+                        label: Text(player.name),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedPlayerIds.add(player.id);
+                            } else {
+                              _selectedPlayerIds.remove(player.id);
+                            }
+                          });
+                        },
+                        selectedColor: Theme.of(context).primaryColor,
+                        checkmarkColor: Colors.white,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : Colors.white70,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
-
             const SizedBox(height: 24),
 
             // Options
