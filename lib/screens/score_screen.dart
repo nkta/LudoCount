@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../models/game.dart';
 import '../models/player.dart';
+import '../l10n/app_localizations.dart';
 
 class ScoreScreen extends StatefulWidget {
   final String gameId;
@@ -55,10 +56,11 @@ class _ScoreScreenState extends State<ScoreScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<GameProvider>(context);
+    final l10n = AppLocalizations.of(context);
     final game = provider.getGame(widget.gameId);
 
     if (game == null) {
-      return const Scaffold(body: Center(child: Text('Partie introuvable')));
+      return Scaffold(body: Center(child: Text(l10n.gameNotFound)));
     }
 
     final gamePlayers = game.playersIds
@@ -68,15 +70,16 @@ class _ScoreScreenState extends State<ScoreScreen> {
         .toList();
 
     if (gamePlayers.isEmpty) {
-      return const Scaffold(body: Center(child: Text('Aucun joueur dans cette partie.')));
+      return Scaffold(body: Center(child: Text(l10n.noPlayersInGame)));
     }
 
     final int roundCount = game.scores[gamePlayers.first.id]?.length ?? 0;
-    
+
     // Définition des largeurs
-    const double columnWidth = 100.0; 
+    const double columnWidth = 100.0;
     const double indexColumnWidth = 50.0;
-    final double totalContentWidth = (gamePlayers.length * columnWidth) + indexColumnWidth;
+    final double totalContentWidth =
+        (gamePlayers.length * columnWidth) + indexColumnWidth;
 
     return Scaffold(
       appBar: AppBar(
@@ -84,7 +87,8 @@ class _ScoreScreenState extends State<ScoreScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.leaderboard),
-            onPressed: () => _showRankingDialog(context, game, gamePlayers, provider),
+            onPressed: () =>
+                _showRankingDialog(context, game, gamePlayers, provider),
           ),
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -109,18 +113,25 @@ class _ScoreScreenState extends State<ScoreScreen> {
                       color: const Color(0xFF2C343C),
                       child: Row(
                         children: [
-                          SizedBox(width: indexColumnWidth, child: const Center(child: Icon(Icons.grid_3x3, color: Colors.grey, size: 18))),
+                          SizedBox(
+                              width: indexColumnWidth,
+                              child: const Center(
+                                  child: Icon(Icons.grid_3x3,
+                                      color: Colors.grey, size: 18))),
                           ...gamePlayers.map((p) => SizedBox(
-                            width: columnWidth,
-                            child: Center(
-                              child: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
-                            ),
-                          ))
+                                width: columnWidth,
+                                child: Center(
+                                  child: Text(p.name,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis),
+                                ),
+                              ))
                         ],
                       ),
                     ),
                     const Divider(height: 1),
-                    
+
                     // BODY (ListView Verticale)
                     Expanded(
                       child: ListView.builder(
@@ -129,21 +140,37 @@ class _ScoreScreenState extends State<ScoreScreen> {
                           return Container(
                             height: 50,
                             decoration: BoxDecoration(
-                              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
-                              color: index % 2 == 0 ? Colors.white.withOpacity(0.02) : Colors.transparent,
+                              border: Border(
+                                  bottom: BorderSide(
+                                      color: Colors.white.withOpacity(0.05))),
+                              color: index % 2 == 0
+                                  ? Colors.white.withOpacity(0.02)
+                                  : Colors.transparent,
                             ),
                             child: Row(
                               children: [
                                 SizedBox(
                                   width: indexColumnWidth,
-                                  child: Center(child: Text('${index + 1}', style: TextStyle(color: Colors.grey.shade500))),
+                                  child: Center(
+                                      child: Text('${index + 1}',
+                                          style: TextStyle(
+                                              color: Colors.grey.shade500))),
                                 ),
                                 ...gamePlayers.map((player) {
                                   final score = game.scores[player.id]?[index];
                                   return SizedBox(
                                     width: columnWidth,
                                     child: InkWell(
-                                      onTap: game.isFinished ? null : () => _editScore(context, provider, game, player.id, index, score, gamePlayers),
+                                      onTap: game.isFinished
+                                          ? null
+                                          : () => _editScore(
+                                              context,
+                                              provider,
+                                              game,
+                                              player.id,
+                                              index,
+                                              score,
+                                              gamePlayers),
                                       child: Center(
                                         child: Text(
                                           score?.toString() ?? '',
@@ -172,16 +199,22 @@ class _ScoreScreenState extends State<ScoreScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
-                boxShadow: [BoxShadow(blurRadius: 4, color: Colors.black12, offset: Offset(0, -1))],
+                boxShadow: [
+                  BoxShadow(
+                      blurRadius: 4,
+                      color: Colors.black12,
+                      offset: Offset(0, -1))
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () => _showAddRoundDialog(context, provider, game, gamePlayers),
+                    onPressed: () => _showAddRoundDialog(
+                        context, provider, game, gamePlayers),
                     icon: const Icon(Icons.add),
-                    label: const Text('AJOUTER UN TOUR'),
+                    label: Text(l10n.addRound),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
@@ -191,58 +224,72 @@ class _ScoreScreenState extends State<ScoreScreen> {
                       shape: const StadiumBorder(),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    onPressed: () => _confirmFinishGame(context, provider, game, gamePlayers),
+                    onPressed: () => _confirmFinishGame(
+                        context, provider, game, gamePlayers),
                     icon: const Icon(Icons.stop),
-                    label: const Text('TERMINER LA PARTIE'),
+                    label: Text(l10n.finishGame),
                   ),
                 ],
               ),
             )
           else
-             Container(
+            Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               alignment: Alignment.center,
-              child: const Text(
-                'PARTIE TERMINÉE',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+              child: Text(
+                l10n.gameFinished,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey),
               ),
-             ),
+            ),
 
           // --- FOOTER (Sticky en bas, scrolle avec le tableau) ---
           Container(
             decoration: const BoxDecoration(
               color: Color(0xFF1F262D),
-              boxShadow: [BoxShadow(blurRadius: 4, color: Colors.black26, offset: Offset(0, -2))],
+              boxShadow: [
+                BoxShadow(
+                    blurRadius: 4, color: Colors.black26, offset: Offset(0, -2))
+              ],
             ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               controller: _footerScrollController,
               child: SizedBox(
-                 width: totalContentWidth,
-                 child: Row(
-                   children: [
-                     SizedBox(width: indexColumnWidth, child: const Center(child: Icon(Icons.functions, color: Colors.grey))),
-                     ...gamePlayers.map((player) {
-                        final total = provider.getPlayerTotal(widget.gameId, player.id);
-                        final bool isMaxReached = game.targetScore != null && total >= game.targetScore!;
-                        return SizedBox(
-                          width: columnWidth,
-                          height: 60,
-                          child: Center(
-                            child: Text(
-                              '$total',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: isMaxReached ? Colors.redAccent : const Color(0xFF66BB6A), 
-                              ),
+                width: totalContentWidth,
+                child: Row(
+                  children: [
+                    SizedBox(
+                        width: indexColumnWidth,
+                        child: const Center(
+                            child: Icon(Icons.functions, color: Colors.grey))),
+                    ...gamePlayers.map((player) {
+                      final total =
+                          provider.getPlayerTotal(widget.gameId, player.id);
+                      final bool isMaxReached = game.targetScore != null &&
+                          total >= game.targetScore!;
+                      return SizedBox(
+                        width: columnWidth,
+                        height: 60,
+                        child: Center(
+                          child: Text(
+                            '$total',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: isMaxReached
+                                  ? Colors.redAccent
+                                  : const Color(0xFF66BB6A),
                             ),
                           ),
-                        );
-                     })
-                   ],
-                 ),
+                        ),
+                      );
+                    })
+                  ],
+                ),
               ),
             ),
           ),
@@ -251,7 +298,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
     );
   }
 
-  void _showAddRoundDialog(BuildContext context, GameProvider provider, Game game, List<Player> players) {
+  void _showAddRoundDialog(BuildContext context, GameProvider provider,
+      Game game, List<Player> players) {
+    final l10n = AppLocalizations.of(context);
     final Map<String, TextEditingController> controllers = {};
     for (var player in players) {
       controllers[player.id] = TextEditingController();
@@ -261,7 +310,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('Nouveau Tour'),
+        title: Text(l10n.newRound),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -272,9 +321,11 @@ class _ScoreScreenState extends State<ScoreScreen> {
                   controller: controllers[player.id],
                   decoration: InputDecoration(
                     labelText: player.name,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(signed: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(signed: true),
                   textInputAction: TextInputAction.next,
                 ),
               );
@@ -282,7 +333,8 @@ class _ScoreScreenState extends State<ScoreScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           ElevatedButton(
             onPressed: () {
               final Map<String, int?> newScores = {};
@@ -295,37 +347,57 @@ class _ScoreScreenState extends State<ScoreScreen> {
               Navigator.pop(ctx);
               _checkEndGameConditions(context, game, players, provider);
             },
-            child: const Text('Ajouter'),
+            child: Text(l10n.add),
           ),
         ],
       ),
     );
   }
 
-  void _editScore(BuildContext context, GameProvider provider, Game game, String playerId, int roundIndex, int? currentScore, List<Player> players) {
-    final controller = TextEditingController(text: currentScore?.toString() ?? '');
+  void _editScore(
+      BuildContext context,
+      GameProvider provider,
+      Game game,
+      String playerId,
+      int roundIndex,
+      int? currentScore,
+      List<Player> players) {
+    final l10n = AppLocalizations.of(context);
+    final controller =
+        TextEditingController(text: currentScore?.toString() ?? '');
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Modifier le score'),
+        title: Text(l10n.editScore),
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(signed: true),
           autofocus: true,
-          onSubmitted: (_) => _submitEdit(context, ctx, provider, game, playerId, roundIndex, controller.text, players),
+          onSubmitted: (_) => _submitEdit(context, ctx, provider, game,
+              playerId, roundIndex, controller.text, players),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           ElevatedButton(
-            onPressed: () => _submitEdit(context, ctx, provider, game, playerId, roundIndex, controller.text, players),
-            child: const Text('Valider'),
+            onPressed: () => _submitEdit(context, ctx, provider, game, playerId,
+                roundIndex, controller.text, players),
+            child: Text(l10n.validate),
           ),
         ],
       ),
     );
   }
 
-  void _submitEdit(BuildContext parentContext, BuildContext dialogContext, GameProvider provider, Game game, String playerId, int roundIndex, String text, List<Player> players) {
+  void _submitEdit(
+      BuildContext parentContext,
+      BuildContext dialogContext,
+      GameProvider provider,
+      Game game,
+      String playerId,
+      int roundIndex,
+      String text,
+      List<Player> players) {
     if (text.isEmpty) {
       provider.updateScore(game.id, playerId, roundIndex, null);
     } else {
@@ -338,13 +410,15 @@ class _ScoreScreenState extends State<ScoreScreen> {
     _checkEndGameConditions(parentContext, game, players, provider);
   }
 
-  void _checkEndGameConditions(BuildContext context, Game game, List<Player> players, GameProvider provider) {
+  void _checkEndGameConditions(BuildContext context, Game game,
+      List<Player> players, GameProvider provider) {
     if (game.targetRounds != null) {
       final currentRounds = game.scores[players.first.id]?.length ?? 0;
       if (currentRounds >= game.targetRounds!) {
         // On termine automatiquement la partie si max tours atteint
         provider.finishGame(game.id);
-        _showRankingDialog(context, game, players, provider, isFinal: true, isAutomatic: true);
+        _showRankingDialog(context, game, players, provider,
+            isFinal: true, isAutomatic: true);
         return;
       }
     }
@@ -357,36 +431,44 @@ class _ScoreScreenState extends State<ScoreScreen> {
         }
       }
       if (maxReached) {
-         // On termine automatiquement la partie si max score atteint
-         provider.finishGame(game.id);
-        _showRankingDialog(context, game, players, provider, isFinal: true, isAutomatic: true);
+        // On termine automatiquement la partie si max score atteint
+        provider.finishGame(game.id);
+        _showRankingDialog(context, game, players, provider,
+            isFinal: true, isAutomatic: true);
       }
     }
   }
 
-  void _confirmFinishGame(BuildContext context, GameProvider provider, Game game, List<Player> players) {
+  void _confirmFinishGame(BuildContext context, GameProvider provider,
+      Game game, List<Player> players) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Terminer la partie ?'),
-        content: const Text('Cela verrouillera les scores. Voulez-vous continuer ?'),
+        title: Text(l10n.finishGameTitle),
+        content: Text(l10n.finishGameMessage),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
               provider.finishGame(game.id);
               Navigator.pop(ctx);
-              _showRankingDialog(context, game, players, provider, isFinal: true);
+              _showRankingDialog(context, game, players, provider,
+                  isFinal: true);
             },
-            child: const Text('Terminer'),
+            child: Text(l10n.finish),
           ),
         ],
       ),
     );
   }
 
-  void _showRankingDialog(BuildContext context, Game game, List<Player> players, GameProvider provider, {bool isFinal = false, bool isAutomatic = false}) {
+  void _showRankingDialog(BuildContext context, Game game, List<Player> players,
+      GameProvider provider,
+      {bool isFinal = false, bool isAutomatic = false}) {
+    final l10n = AppLocalizations.of(context);
     final Map<String, int> totals = {};
     for (var p in players) {
       totals[p.id] = provider.getPlayerTotal(game.id, p.id);
@@ -395,7 +477,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
     sortedPlayers.sort((a, b) {
       final scoreA = totals[a.id]!;
       final scoreB = totals[b.id]!;
-      return game.isInverseScore ? scoreA.compareTo(scoreB) : scoreB.compareTo(scoreA);
+      return game.isInverseScore
+          ? scoreA.compareTo(scoreB)
+          : scoreB.compareTo(scoreA);
     });
 
     showDialog(
@@ -406,7 +490,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
           children: [
             const Icon(Icons.emoji_events, color: Colors.amber),
             const SizedBox(width: 8),
-            Text(isFinal ? 'Résultats Finaux' : 'Classement'),
+            Text(isFinal ? l10n.finalResults : l10n.ranking),
           ],
         ),
         content: SingleChildScrollView(
@@ -416,17 +500,22 @@ class _ScoreScreenState extends State<ScoreScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (isAutomatic && !isFinal)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 16.0),
-                    child: Text('Une limite de la partie a été atteinte !', style: TextStyle(color: Colors.orangeAccent, fontStyle: FontStyle.italic)),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(l10n.autoLimitReached,
+                        style: const TextStyle(
+                            color: Colors.orangeAccent,
+                            fontStyle: FontStyle.italic)),
                   ),
                 ...sortedPlayers.asMap().entries.map((entry) {
                   final index = entry.key;
                   final player = entry.value;
                   final score = totals[player.id]!;
                   Color? rankColor;
-                  if (index == 0) rankColor = Colors.amber;
-                  else if (index == 1) rankColor = Colors.grey.shade400;
+                  if (index == 0)
+                    rankColor = Colors.amber;
+                  else if (index == 1)
+                    rankColor = Colors.grey.shade400;
                   else if (index == 2) rankColor = Colors.brown.shade300;
 
                   return Container(
@@ -435,18 +524,35 @@ class _ScoreScreenState extends State<ScoreScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(8),
-                      border: rankColor != null ? Border.all(color: rankColor, width: 2) : null,
+                      border: rankColor != null
+                          ? Border.all(color: rankColor, width: 2)
+                          : null,
                     ),
                     child: Row(
                       children: [
                         Container(
-                          width: 40, height: 40, alignment: Alignment.center,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: rankColor ?? Colors.transparent),
-                          child: Text('#${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, color: rankColor != null ? Colors.black : Colors.white)),
+                          width: 40,
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: rankColor ?? Colors.transparent),
+                          child: Text('#${index + 1}',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: rankColor != null
+                                      ? Colors.black
+                                      : Colors.white)),
                         ),
                         const SizedBox(width: 12),
-                        Expanded(child: Text(player.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                        Text('$score pts', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Expanded(
+                            child: Text(player.name,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold))),
+                        Text('$score ${l10n.pointsSuffix}',
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   );
@@ -461,16 +567,19 @@ class _ScoreScreenState extends State<ScoreScreen> {
               Navigator.pop(ctx);
               if (isFinal) Navigator.pop(context);
             },
-            child: Text(isFinal ? 'Quitter' : 'OK'),
+            child: Text(isFinal ? l10n.leave : l10n.ok),
           ),
           if (isFinal)
-             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Voir la grille')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.viewGrid)),
         ],
       ),
     );
   }
 
   void _showGameInfo(BuildContext context, Game game) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       builder: (ctx) => Container(
@@ -481,10 +590,13 @@ class _ScoreScreenState extends State<ScoreScreen> {
           children: [
             Text(game.title, style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 10),
-            Text('Date: ${game.date.toString().split('.')[0]}'),
-            Text('Mode: ${game.isInverseScore ? "Score Inversé (Golf)" : "Standard"}'),
-            if (game.targetScore != null) Text('Score Max: ${game.targetScore}'),
-            if (game.targetRounds != null) Text('Tours Max: ${game.targetRounds}'),
+            Text('${l10n.dateLabel} ${game.date.toString().split('.')[0]}'),
+            Text(
+                '${l10n.modeLabel} ${game.isInverseScore ? l10n.modeInverse : l10n.modeStandard}'),
+            if (game.targetScore != null)
+              Text('${l10n.maxScoreLabelInfo} ${game.targetScore}'),
+            if (game.targetRounds != null)
+              Text('${l10n.maxRoundsLabelInfo} ${game.targetRounds}'),
             const SizedBox(height: 20),
           ],
         ),

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('LudoCount')),
+      appBar: AppBar(title: Text(l10n.appTitle)),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -18,28 +20,28 @@ class HomeScreen extends StatelessWidget {
             const Spacer(),
             _buildMenuButton(
               context,
-              label: 'CONTINUER',
+              label: l10n.continueLabel,
               color: const Color(0xFF66BB6A),
               onPressed: () => _continueLastGame(context),
             ),
             const SizedBox(height: 16),
             _buildMenuButton(
               context,
-              label: 'NOUVELLE PARTIE',
+              label: l10n.newGame,
               color: const Color(0xFFFFA726),
               onPressed: () => Navigator.pushNamed(context, '/config'),
             ),
             const SizedBox(height: 16),
             _buildMenuButton(
               context,
-              label: 'HISTORIQUE',
+              label: l10n.history,
               color: const Color(0xFFEF5350),
               onPressed: () => Navigator.pushNamed(context, '/history'),
             ),
             const SizedBox(height: 16),
             _buildMenuButton(
               context,
-              label: 'JOUEURS',
+              label: l10n.players,
               color: const Color(0xFF42A5F5),
               onPressed: () => Navigator.pushNamed(context, '/players'),
             ),
@@ -81,6 +83,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _continueLastGame(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final gameProvider = Provider.of<GameProvider>(context, listen: false);
     final lastGame = gameProvider.getLastGame();
 
@@ -88,9 +91,8 @@ class HomeScreen extends StatelessWidget {
       Navigator.pushNamed(context, '/score', arguments: lastGame.id);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Aucune partie récente trouvée.')),
+        SnackBar(content: Text(l10n.noRecentGame)),
       );
     }
   }
 }
-

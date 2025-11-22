@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../models/player.dart';
+import '../l10n/app_localizations.dart';
 
 class PlayerListScreen extends StatelessWidget {
   const PlayerListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Liste des Joueurs')),
+      appBar: AppBar(title: Text(l10n.playerListTitle)),
       body: Consumer<GameProvider>(
         builder: (context, provider, child) {
           final players = provider.players;
           if (players.isEmpty) {
-            return const Center(child: Text('Aucun joueur enregistré.'));
+            return Center(child: Text(l10n.noSavedPlayers));
           }
           return ListView.builder(
             padding: const EdgeInsets.all(8),
@@ -48,21 +50,22 @@ class PlayerListScreen extends StatelessWidget {
   }
 
   void _showAddPlayerDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Nouveau Joueur'),
+        title: Text(l10n.newPlayer),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(labelText: 'Nom'),
+          decoration: InputDecoration(labelText: l10n.name),
           autofocus: true,
           textCapitalization: TextCapitalization.words,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -72,23 +75,25 @@ class PlayerListScreen extends StatelessWidget {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Ajouter'),
+            child: Text(l10n.add),
           ),
         ],
       ),
     );
   }
 
-  void _confirmDelete(BuildContext context, GameProvider provider, Player player) {
+  void _confirmDelete(
+      BuildContext context, GameProvider provider, Player player) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer le joueur ?'),
-        content: Text('Voulez-vous vraiment supprimer ${player.name} ?'),
+        title: Text(l10n.deletePlayerTitle),
+        content: Text(l10n.deletePlayerMessage(player.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -96,11 +101,10 @@ class PlayerListScreen extends StatelessWidget {
               Navigator.pop(ctx);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Supprimer'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
     );
   }
 }
-

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 
 import 'models/game.dart';
 import 'models/player.dart';
@@ -37,15 +38,16 @@ class LudoCountApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GameProvider()),
       ],
       child: MaterialApp(
-        title: 'LudoCount',
+        onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
         localizationsDelegates: const [
+          AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [Locale('fr', 'FR')],
+        supportedLocales: AppLocalizations.supportedLocales,
         initialRoute: '/',
         routes: {
           '/': (context) => const HomeScreen(),
@@ -68,10 +70,11 @@ class LudoCountApp extends StatelessWidget {
 
   ThemeData _buildTheme() {
     final base = ThemeData.dark(useMaterial3: true);
-    
+
     const bgColor = Color(0xFF2C343C);
     const surfaceColor = Color(0xFF37414A);
-    const primaryColor = Color(0xFF66BB6A); // Utiliser le vert comme primaire par défaut
+    const primaryColor =
+        Color(0xFF66BB6A); // Utiliser le vert comme primaire par défaut
 
     return base.copyWith(
       scaffoldBackgroundColor: bgColor,
@@ -115,4 +118,3 @@ class LudoCountApp extends StatelessWidget {
     );
   }
 }
-

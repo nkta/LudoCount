@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class GameConfigScreen extends StatefulWidget {
   const GameConfigScreen({super.key});
@@ -26,11 +28,12 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final provider = Provider.of<GameProvider>(context);
     final players = provider.players;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Nouvelle Partie')),
+      appBar: AppBar(title: Text(l10n.newGameTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -39,18 +42,18 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
             // Titre
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Titre de la partie (Optionnel)',
-                hintText: 'Soirée Jeux...',
-                prefixIcon: Icon(Icons.edit),
+              decoration: InputDecoration(
+                labelText: l10n.gameTitleLabel,
+                hintText: l10n.gameTitleHint,
+                prefixIcon: const Icon(Icons.edit),
               ),
             ),
             const SizedBox(height: 24),
 
             // Sélection des joueurs
-            const Text(
-              'Sélectionnez les joueurs',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.selectPlayers,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             if (players.isEmpty)
@@ -59,10 +62,11 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      const Text('Aucun joueur disponible.'),
+                      Text(l10n.noPlayers),
                       TextButton(
-                        onPressed: () => Navigator.pushNamed(context, '/players'),
-                        child: const Text('Créer des joueurs'),
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/players'),
+                        child: Text(l10n.createPlayers),
                       )
                     ],
                   ),
@@ -98,15 +102,15 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
             const SizedBox(height: 24),
 
             // Options
-            const Text(
-              'Options',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.options,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Marquage inversé (le plus bas gagne)'),
-              subtitle: const Text('Ex: Golf, Skyjo...'),
+              title: Text(l10n.inverseScoring),
+              subtitle: Text(l10n.inverseScoringSubtitle),
               value: _isInverseScore,
               onChanged: (val) => setState(() => _isInverseScore = val),
             ),
@@ -117,10 +121,10 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                   child: TextField(
                     controller: _maxScoreController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Score Max',
-                      hintText: 'Ex: 500',
-                      prefixIcon: Icon(Icons.flag),
+                    decoration: InputDecoration(
+                      labelText: l10n.maxScoreLabel,
+                      hintText: l10n.maxScoreHint,
+                      prefixIcon: const Icon(Icons.flag),
                     ),
                   ),
                 ),
@@ -129,10 +133,10 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                   child: TextField(
                     controller: _maxRoundsController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Tours Max',
-                      hintText: 'Ex: 10',
-                      prefixIcon: Icon(Icons.repeat),
+                    decoration: InputDecoration(
+                      labelText: l10n.maxRoundsLabel,
+                      hintText: l10n.maxRoundsHint,
+                      prefixIcon: const Icon(Icons.repeat),
                     ),
                   ),
                 ),
@@ -149,11 +153,19 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
               onPressed: _selectedPlayerIds.length < 1
                   ? null
                   : () async {
-                      final targetScore = int.tryParse(_maxScoreController.text);
-                      final targetRounds = int.tryParse(_maxRoundsController.text);
-                      
+                      final rawTitle = _titleController.text.trim();
+                      final dateLabel =
+                          DateFormat('yyyy-MM-dd').format(DateTime.now());
+                      final resolvedTitle = rawTitle.isEmpty
+                          ? l10n.defaultGameTitle(dateLabel)
+                          : rawTitle;
+                      final targetScore =
+                          int.tryParse(_maxScoreController.text);
+                      final targetRounds =
+                          int.tryParse(_maxRoundsController.text);
+
                       final gameId = await provider.createGame(
-                        _titleController.text.trim(),
+                        resolvedTitle,
                         _selectedPlayerIds,
                         _isInverseScore,
                         targetScore: targetScore,
@@ -167,7 +179,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                         );
                       }
                     },
-              child: const Text('LANCER LA PARTIE'),
+              child: Text(l10n.startGame),
             ),
           ],
         ),

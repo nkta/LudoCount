@@ -33,7 +33,9 @@ class GameProvider extends ChangeNotifier {
 
   // --- Game Logic ---
 
-  Future<String> createGame(String title, List<String> playerIds, bool isInverse, {int? targetScore, int? targetRounds}) async {
+  Future<String> createGame(
+      String title, List<String> playerIds, bool isInverse,
+      {int? targetScore, int? targetRounds}) async {
     final id = _uuid.v4();
     // Initialiser les scores vides pour chaque joueur
     final Map<String, List<int?>> initialScores = {};
@@ -43,7 +45,7 @@ class GameProvider extends ChangeNotifier {
 
     final newGame = Game(
       id: id,
-      title: title.isEmpty ? 'Partie du ${DateTime.now().toString().split(' ')[0]}' : title,
+      title: title.isEmpty ? DateTime.now().toString().split(' ')[0] : title,
       date: DateTime.now(),
       playersIds: playerIds,
       scores: initialScores,
@@ -75,19 +77,21 @@ class GameProvider extends ChangeNotifier {
     game.scores.forEach((playerId, scoreList) {
       scoreList.add(newScores?[playerId]);
     });
-    
-    await game.save(); 
+
+    await game.save();
     notifyListeners();
   }
 
   /// Met à jour un score spécifique
-  Future<void> updateScore(String gameId, String playerId, int roundIndex, int? newScore) async {
+  Future<void> updateScore(
+      String gameId, String playerId, int roundIndex, int? newScore) async {
     final game = getGame(gameId);
     if (game == null) return;
 
-    if (game.scores.containsKey(playerId) && roundIndex < game.scores[playerId]!.length) {
+    if (game.scores.containsKey(playerId) &&
+        roundIndex < game.scores[playerId]!.length) {
       game.scores[playerId]![roundIndex] = newScore;
-      await game.save(); 
+      await game.save();
       notifyListeners();
     }
   }
@@ -95,7 +99,7 @@ class GameProvider extends ChangeNotifier {
   int getPlayerTotal(String gameId, String playerId) {
     final game = getGame(gameId);
     if (game == null) return 0;
-    
+
     final scores = game.scores[playerId];
     if (scores == null || scores.isEmpty) return 0;
 
