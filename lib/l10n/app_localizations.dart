@@ -22,6 +22,8 @@ class AppLocalizations {
   static const Map<String, Map<String, String>> _localizedValues = {
     'fr': {
       'appTitle': 'LudoCount',
+      'presets': 'Presets',
+      'usePreset': 'Utiliser ce preset',
       'continue': 'CONTINUER',
       'newGame': 'NOUVELLE PARTIE',
       'history': 'HISTORIQUE',
@@ -33,13 +35,21 @@ class AppLocalizations {
       'defaultGameTitle': 'Partie du {date}',
       'selectPlayers': 'Sélectionnez les joueurs',
       'quickSelectDefaults': 'Sélectionner les joueurs par défaut ({count})',
-      'quickSelectLast':
-          'Pré-sélectionner les {count} joueurs de la dernière partie',
       'noPlayers': 'Aucun joueur disponible.',
       'createPlayers': 'Créer des joueurs',
       'defaultPlayer': 'Sélection par défaut',
       'markAsDefault': 'Marquer comme joueur par défaut',
       'defaultBadge': 'Par défaut',
+      'clearDefaults': 'Désélectionner tous les joueurs par défaut',
+      'presetClassic': 'Classique 500 points',
+      'presetClassicDesc': 'Mode standard, limite de score à 500.',
+      'presetInverse': 'Inverse 100 points',
+      'presetInverseDesc': 'Le plus bas gagne, partie jusqu’à 100.',
+      'presetRounds': '10 tours',
+      'presetRoundsDesc': 'Score standard, partie limitée à 10 tours.',
+      'newPreset': 'Nouveau preset',
+      'presetNameLabel': 'Nom du preset',
+      'noPresets': 'Aucun preset enregistré.',
       'options': 'Options',
       'inverseScoring': 'Marquage inversé (le plus bas gagne)',
       'inverseScoringSubtitle': 'Ex: Golf, Skyjo...',
@@ -88,6 +98,8 @@ class AppLocalizations {
     },
     'en': {
       'appTitle': 'LudoCount',
+      'presets': 'Presets',
+      'usePreset': 'Use this preset',
       'continue': 'CONTINUE',
       'newGame': 'NEW GAME',
       'history': 'HISTORY',
@@ -105,6 +117,16 @@ class AppLocalizations {
       'defaultPlayer': 'Default selection',
       'markAsDefault': 'Mark as default player',
       'defaultBadge': 'Default',
+      'clearDefaults': 'Clear all default players',
+      'presetClassic': 'Classic 500 points',
+      'presetClassicDesc': 'Standard scoring with a 500-point cap.',
+      'presetInverse': 'Inverse 100 points',
+      'presetInverseDesc': 'Lowest score wins, up to 100.',
+      'presetRounds': '10 rounds',
+      'presetRoundsDesc': 'Standard scoring, limited to 10 rounds.',
+      'newPreset': 'New preset',
+      'presetNameLabel': 'Preset name',
+      'noPresets': 'No presets saved.',
       'options': 'Options',
       'inverseScoring': 'Inverse scoring (lowest wins)',
       'inverseScoringSubtitle': 'Ex: Golf, Skyjo...',
@@ -152,6 +174,8 @@ class AppLocalizations {
     },
     'es': {
       'appTitle': 'LudoCount',
+      'presets': 'Presets',
+      'usePreset': 'Usar este preset',
       'continue': 'CONTINUAR',
       'newGame': 'NUEVA PARTIDA',
       'history': 'HISTORIAL',
@@ -163,13 +187,21 @@ class AppLocalizations {
       'defaultGameTitle': 'Partida del {date}',
       'selectPlayers': 'Seleccione los jugadores',
       'quickSelectDefaults': 'Seleccionar jugadores por defecto ({count})',
-      'quickSelectLast':
-          'Preseleccionar los {count} jugadores de la última partida',
       'noPlayers': 'No hay jugadores disponibles.',
       'createPlayers': 'Crear jugadores',
       'defaultPlayer': 'Selección por defecto',
       'markAsDefault': 'Marcar como jugador por defecto',
       'defaultBadge': 'Por defecto',
+      'clearDefaults': 'Quitar todos los jugadores por defecto',
+      'presetClassic': 'Clásico 500 puntos',
+      'presetClassicDesc': 'Puntuación estándar con límite de 500.',
+      'presetInverse': 'Inverso 100 puntos',
+      'presetInverseDesc': 'Gana el más bajo, hasta 100.',
+      'presetRounds': '10 rondas',
+      'presetRoundsDesc': 'Puntuación estándar, límite de 10 rondas.',
+      'newPreset': 'Nuevo preset',
+      'presetNameLabel': 'Nombre del preset',
+      'noPresets': 'No hay presets guardados.',
       'options': 'Opciones',
       'inverseScoring': 'Puntuación inversa (gana el menor)',
       'inverseScoringSubtitle': 'Ej.: Golf, Skyjo...',
@@ -217,6 +249,8 @@ class AppLocalizations {
     },
     'de': {
       'appTitle': 'LudoCount',
+      'presets': 'Presets',
+      'usePreset': 'Diesen Preset nutzen',
       'continue': 'FORTSETZEN',
       'newGame': 'NEUES SPIEL',
       'history': 'VERLAUF',
@@ -228,12 +262,21 @@ class AppLocalizations {
       'defaultGameTitle': 'Spiel vom {date}',
       'selectPlayers': 'Spieler auswählen',
       'quickSelectDefaults': 'Standardspieler auswählen ({count})',
-      'quickSelectLast': 'Letzte {count} Spieler vorauswählen',
       'noPlayers': 'Keine Spieler verfügbar.',
       'createPlayers': 'Spieler erstellen',
       'defaultPlayer': 'Standardauswahl',
       'markAsDefault': 'Als Standardspieler markieren',
       'defaultBadge': 'Standard',
+      'clearDefaults': 'Alle Standardspieler entfernen',
+      'presetClassic': 'Klassisch 500 Punkte',
+      'presetClassicDesc': 'Standardwertung mit 500-Punkte-Limit.',
+      'presetInverse': 'Inverse 100 Punkte',
+      'presetInverseDesc': 'Niedrigster Punktestand gewinnt, bis 100.',
+      'presetRounds': '10 Runden',
+      'presetRoundsDesc': 'Standardwertung, auf 10 Runden begrenzt.',
+      'newPreset': 'Neuer Preset',
+      'presetNameLabel': 'Preset-Name',
+      'noPresets': 'Keine Presets gespeichert.',
       'options': 'Optionen',
       'inverseScoring': 'Umgekehrte Wertung (niedrig gewinnt)',
       'inverseScoringSubtitle': 'z. B. Golf, Skyjo...',
@@ -289,6 +332,8 @@ class AppLocalizations {
   }
 
   String get appTitle => _t('appTitle');
+  String get presets => _t('presets');
+  String get usePreset => _t('usePreset');
   String get continueLabel => _t('continue');
   String get newGame => _t('newGame');
   String get history => _t('history');
@@ -302,13 +347,21 @@ class AppLocalizations {
   String get selectPlayers => _t('selectPlayers');
   String quickSelectDefaults(int count) =>
       _t('quickSelectDefaults').replaceFirst('{count}', '$count');
-  String quickSelectLast(int count) =>
-      _t('quickSelectLast').replaceFirst('{count}', '$count');
   String get noPlayers => _t('noPlayers');
   String get createPlayers => _t('createPlayers');
   String get defaultPlayer => _t('defaultPlayer');
   String get markAsDefault => _t('markAsDefault');
   String get defaultBadge => _t('defaultBadge');
+  String get clearDefaults => _t('clearDefaults');
+  String get presetClassic => _t('presetClassic');
+  String get presetClassicDesc => _t('presetClassicDesc');
+  String get presetInverse => _t('presetInverse');
+  String get presetInverseDesc => _t('presetInverseDesc');
+  String get presetRounds => _t('presetRounds');
+  String get presetRoundsDesc => _t('presetRoundsDesc');
+  String get newPreset => _t('newPreset');
+  String get presetNameLabel => _t('presetNameLabel');
+  String get noPresets => _t('noPresets');
   String get options => _t('options');
   String get inverseScoring => _t('inverseScoring');
   String get inverseScoringSubtitle => _t('inverseScoringSubtitle');

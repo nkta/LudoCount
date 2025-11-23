@@ -15,48 +15,67 @@ class PlayerListScreen extends StatelessWidget {
       body: Consumer<GameProvider>(
         builder: (context, provider, child) {
           final players = provider.players;
+          final hasDefaults = players.any((p) => p.isDefault);
           if (players.isEmpty) {
             return Center(child: Text(l10n.noSavedPlayers));
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: players.length,
-            itemBuilder: (context, index) {
-              final player = players[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: Text(player.name[0].toUpperCase()),
-                  ),
-                  title: Text(player.name),
-                  subtitle: player.isDefault
-                      ? Text(
-                          l10n.defaultBadge,
-                          style:
-                              TextStyle(color: Theme.of(context).primaryColor),
-                        )
-                      : null,
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Checkbox(
-                        value: player.isDefault,
-                        onChanged: (value) {
-                          provider.setPlayerDefault(player.id, value ?? false);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.redAccent),
-                        onPressed: () =>
-                            _confirmDelete(context, provider, player),
-                      ),
-                    ],
+          return Column(
+            children: [
+              if (hasDefaults)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: OutlinedButton.icon(
+                    onPressed: provider.clearDefaultPlayers,
+                    icon: const Icon(Icons.clear_all),
+                    label: Text(l10n.clearDefaults),
                   ),
                 ),
-              );
-            },
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(8),
+                  itemCount: players.length,
+                  itemBuilder: (context, index) {
+                    final player = players[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          child: Text(player.name[0].toUpperCase()),
+                        ),
+                        title: Text(player.name),
+                        subtitle: player.isDefault
+                            ? Text(
+                                l10n.defaultBadge,
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                              )
+                            : null,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Checkbox(
+                              value: player.isDefault,
+                              onChanged: (value) {
+                                provider.setPlayerDefault(
+                                    player.id, value ?? false);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete,
+                                  color: Colors.redAccent),
+                              onPressed: () =>
+                                  _confirmDelete(context, provider, player),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),

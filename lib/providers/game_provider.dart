@@ -3,15 +3,45 @@ import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import '../models/game.dart';
 import '../models/player.dart';
+import '../models/game_preset.dart';
 
 class GameProvider extends ChangeNotifier {
   final Box<Player> _playerBox = Hive.box<Player>('players');
   final Box<Game> _gameBox = Hive.box<Game>('games');
+  final Box<GamePreset> _presetBox = Hive.box<GamePreset>('presets');
   final Uuid _uuid = const Uuid();
 
   List<Player> get players => _playerBox.values.toList();
   List<Game> get games => _gameBox.values.toList()
     ..sort((a, b) => b.date.compareTo(a.date)); // Du plus récent au plus ancien
+
+  // --- Presets ---
+  List<GamePreset> get presets => _presetBox.values.toList();
+
+  Future<void> addPreset({
+    required String title,
+    required bool isInverseScore,
+    int? targetScore,
+    int? targetRounds,
+  }) async {
+    final preset = GamePreset(
+      id: _uuid.v4(),
+      title: title,
+      isInverseScore: isInverseScore,
+      targetScore: targetScore,
+      targetRounds: targetRounds,
+      isCustom: true,
+    );
+    await _presetBox.put(preset.id, preset);
+    notifyListeners();
+  }
+
+  Future<void> deletePreset(String id) async {
+    if (_presetBox.containsKey(id)) {
+      await _presetBox.delete(id);
+      notifyListeners();
+    }
+  }
 
   // --- Players Logic ---
 
@@ -41,6 +71,17 @@ class GameProvider extends ChangeNotifier {
 
   List<String> getDefaultPlayerIds() {
     return players.where((p) => p.isDefault).map((p) => p.id).toList();
+  }
+
+  Future<void> clearDefaultPlayers() async {
+    final defaults = players.where((p) => p.isDefault).toList();
+    for (final player in defaults) {
+      player.isDefault = false;
+      await player.save();
+    }
+    if (defaults.isNotEmpty) {
+      notifyListeners();
+    }
   }
 
   // --- Game Logic ---

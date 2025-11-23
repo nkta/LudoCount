@@ -1,38 +1,47 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'player.dart';
+part of 'game_preset.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class PlayerAdapter extends TypeAdapter<Player> {
+class GamePresetAdapter extends TypeAdapter<GamePreset> {
   @override
-  final int typeId = 0;
+  final int typeId = 2;
 
   @override
-  Player read(BinaryReader reader) {
+  GamePreset read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Player(
+    return GamePreset(
       id: fields[0] as String,
-      name: fields[1] as String,
-      isDefault: fields[2] as bool,
+      title: fields[1] as String,
+      isInverseScore: fields[2] as bool,
+      targetScore: fields[3] as int?,
+      targetRounds: fields[4] as int?,
+      isCustom: fields[5] as bool,
     );
   }
 
   @override
-  void write(BinaryWriter writer, Player obj) {
+  void write(BinaryWriter writer, GamePreset obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.name)
+      ..write(obj.title)
       ..writeByte(2)
-      ..write(obj.isDefault);
+      ..write(obj.isInverseScore)
+      ..writeByte(3)
+      ..write(obj.targetScore)
+      ..writeByte(4)
+      ..write(obj.targetRounds)
+      ..writeByte(5)
+      ..write(obj.isCustom);
   }
 
   @override
@@ -41,7 +50,7 @@ class PlayerAdapter extends TypeAdapter<Player> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PlayerAdapter &&
+      other is GamePresetAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

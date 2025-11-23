@@ -34,6 +34,13 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildMenuButton(
               context,
+              label: l10n.presets.toUpperCase(),
+              color: const Color(0xFF8E24AA),
+              onPressed: () => Navigator.pushNamed(context, '/presets'),
+            ),
+            const SizedBox(height: 16),
+            _buildMenuButton(
+              context,
               label: l10n.history,
               color: const Color(0xFFEF5350),
               onPressed: () => Navigator.pushNamed(context, '/history'),

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../l10n/app_localizations.dart';
+import '../models/game_preset.dart';
 
 class GameConfigScreen extends StatefulWidget {
   const GameConfigScreen({super.key});
@@ -16,6 +17,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
   final _maxScoreController = TextEditingController();
   final _maxRoundsController = TextEditingController();
   final List<String> _selectedPlayerIds = [];
+  String? _selectedPresetId;
   bool _initializedSelection = false;
   bool _isInverseScore = false;
 
@@ -33,9 +35,14 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
     final provider = Provider.of<GameProvider>(context);
     final players = provider.players;
     final defaultIds = provider.getDefaultPlayerIds();
-    final preferredIds =
-        defaultIds.isNotEmpty ? defaultIds : provider.getPreferredPlayerIds();
-    final bool usesDefaultPreset = defaultIds.isNotEmpty;
+    final preferredIds = defaultIds;
+    final presets = provider.presets;
+    final presetArg = ModalRoute.of(context)?.settings.arguments as GamePreset?;
+
+    if (!_initializedSelection && presetArg != null) {
+      _applyPreset(presetArg);
+      _selectedPresetId = presetArg.id;
+    }
 
     if (!_initializedSelection && preferredIds.isNotEmpty) {
       _selectedPlayerIds
@@ -43,6 +50,8 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
         ..addAll(preferredIds);
       _initializedSelection = true;
     }
+
+    final bool isPresetLocked = _selectedPresetId != null;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.newGameTitle)),
@@ -61,6 +70,52 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
               ),
             ),
             const SizedBox(height: 24),
+
+            // Preset
+            if (presets.isNotEmpty) ...[
+              Text(
+                l10n.presets,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String?>(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+                value: _selectedPresetId,
+                hint: Text(l10n.presets),
+                items: [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text('-'),
+                  ),
+                  ...presets.map(
+                    (preset) => DropdownMenuItem(
+                      value: preset.id,
+                      child: Text(_presetTitle(preset, l10n)),
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPresetId = value;
+                    final preset = presets.firstWhere((p) => p.id == value);
+                    if (value != null) {
+                      _applyPreset(preset);
+                    } else {
+                      // Déverrouillage: l'utilisateur peut éditer à nouveau
+                      _isInverseScore = _isInverseScore;
+                    }
+                  });
+                },
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // Sélection des joueurs
             Text(
@@ -128,7 +183,9 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
               title: Text(l10n.inverseScoring),
               subtitle: Text(l10n.inverseScoringSubtitle),
               value: _isInverseScore,
-              onChanged: (val) => setState(() => _isInverseScore = val),
+              onChanged: isPresetLocked
+                  ? null
+                  : (val) => setState(() => _isInverseScore = val),
             ),
             const SizedBox(height: 12),
             Row(
@@ -142,6 +199,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       hintText: l10n.maxScoreHint,
                       prefixIcon: const Icon(Icons.flag),
                     ),
+                    enabled: !isPresetLocked,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -154,6 +212,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       hintText: l10n.maxRoundsHint,
                       prefixIcon: const Icon(Icons.repeat),
                     ),
+                    enabled: !isPresetLocked,
                   ),
                 ),
               ],
@@ -173,7 +232,12 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       final dateLabel =
                           DateFormat('yyyy-MM-dd').format(DateTime.now());
                       final resolvedTitle = rawTitle.isEmpty
-                          ? l10n.defaultGameTitle(dateLabel)
+                          ? (_selectedPresetId != null
+                              ? _presetTitle(
+                                  presets.firstWhere(
+                                      (p) => p.id == _selectedPresetId),
+                                  l10n)
+                              : l10n.defaultGameTitle(dateLabel))
                           : rawTitle;
                       final targetScore =
                           int.tryParse(_maxScoreController.text);
@@ -201,5 +265,17 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
         ),
       ),
     );
+  }
+
+  void _applyPreset(GamePreset preset) {
+    _isInverseScore = preset.isInverseScore;
+    _maxScoreController.text =
+        preset.targetScore != null ? '${preset.targetScore}' : '';
+    _maxRoundsController.text =
+        preset.targetRounds != null ? '${preset.targetRounds}' : '';
+  }
+
+  String _presetTitle(GamePreset preset, AppLocalizations l10n) {
+    return preset.title;
   }
 }
