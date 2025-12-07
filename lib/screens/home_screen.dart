@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -52,6 +53,14 @@ class HomeScreen extends StatelessWidget {
               color: const Color(0xFF42A5F5),
               onPressed: () => Navigator.pushNamed(context, '/players'),
             ),
+            const SizedBox(height: 16),
+            _buildMenuButton(
+              context,
+              label: 'Soutenir le dev',
+              color: Colors.pinkAccent,
+              icon: Icons.coffee,
+              onPressed: () => _launchDonationUrl(),
+            ),
             const Spacer(),
           ],
         ),
@@ -100,6 +109,13 @@ class HomeScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.noRecentGame)),
       );
+    }
+  }
+
+  Future<void> _launchDonationUrl() async {
+    final Uri url = Uri.parse('https://buymeacoffee.com/nkta1');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
     }
   }
 }
