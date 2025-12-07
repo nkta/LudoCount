@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../models/game.dart';
 import '../models/player.dart';
+import '../models/game_preset.dart';
 import '../l10n/app_localizations.dart';
 
 class ScoreScreen extends StatefulWidget {
@@ -137,8 +138,12 @@ class _ScoreScreenState extends State<ScoreScreen> {
                       child: ListView.builder(
                         itemCount: roundCount,
                         itemBuilder: (context, index) {
+                          final label = game.roundLabels != null &&
+                                  index < game.roundLabels!.length
+                              ? game.roundLabels![index]
+                              : '${index + 1}';
                           return Container(
-                            height: 50,
+                            // height: 50, // Removed to allow dynamic height
                             decoration: BoxDecoration(
                               border: Border(
                                   bottom: BorderSide(
@@ -152,29 +157,68 @@ class _ScoreScreenState extends State<ScoreScreen> {
                                 SizedBox(
                                   width: indexColumnWidth,
                                   child: Center(
-                                      child: Text('${index + 1}',
+                                      child: Text(label,
                                           style: TextStyle(
-                                              color: Colors.grey.shade500))),
+                                              color: Colors.grey.shade500,
+                                              fontSize: 12))),
                                 ),
                                 ...gamePlayers.map((player) {
                                   final score = game.scores[player.id]?[index];
                                   return SizedBox(
                                     width: columnWidth,
                                     child: InkWell(
-                                      onTap: game.isFinished
-                                          ? null
-                                          : () => _editScore(
-                                              context,
-                                              provider,
-                                              game,
-                                              player.id,
-                                              index,
-                                              score,
-                                              gamePlayers),
+                                      onTap: () {
+                                        if (!game.isFinished) {
+                                          _editScore(context, provider, game,
+                                              player.id, index, score, gamePlayers);
+                                        }
+                                      },
                                       child: Center(
-                                        child: Text(
-                                          score?.toString() ?? '',
-                                          style: const TextStyle(fontSize: 18),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              score != null ? '$score' : '-',
+                                              style: const TextStyle(fontSize: 16),
+                                            ),
+                                            if (game.roundData != null &&
+                                                game.roundData![player.id] != null &&
+                                                index < game.roundData![player.id]!.length &&
+                                                game.roundData![player.id]![index] != null)
+                                              Builder(
+                                                builder: (context) {
+                                                  // Essayer de trouver le preset pour avoir les libellés
+                                                  final data = game.roundData![player.id]![index]!;
+                                                  if (game.fields != null) {
+                                                    // Affichage avec libellés pour Expert Mode
+                                                    return Column(
+                                                      children: game.fields!.map((field) {
+                                                        final val = data[field.key] ?? 0;
+                                                        if (val == 0) return const SizedBox.shrink(); // Masquer si 0 pour alléger
+                                                        return Text(
+                                                          '${field.label}: $val',
+                                                          style: const TextStyle(
+                                                            fontSize: 10,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        );
+                                                      }).toList(),
+                                                    );
+                                                  } else {
+                                                    // Fallback ancien affichage
+                                                    return Text(
+                                                      data.entries
+                                                          .map((e) => '${e.value}')
+                                                          .join(' / '),
+                                                      style: const TextStyle(
+                                                        fontSize: 10,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                              ),
+                                          ],
                                         ),
                                       ),
                                     ),
@@ -210,13 +254,37 @@ class _ScoreScreenState extends State<ScoreScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _showAddRoundDialog(
-                        context, provider, game, gamePlayers),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.addRound),
-                  ),
-                  const SizedBox(height: 8),
+                  if (game.roundLabels == null) ...[
+                    ElevatedButton.icon(
+              onPressed: () {
+                if (game.isFinished) return;
+                
+                // Vérifier si c'est un mode expert
+                if (game.fields != null) {
+                  // Mode Expert : Ajouter une ligne vide directement
+                  // L'utilisateur cliquera ensuite sur les cases pour remplir les détails
+                  provider.addRound(game.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Nouveau tour ajouté. Cliquez sur une case pour saisir les détails.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                } else {
+                  // Mode Standard
+                  _showAddRoundDialog(context, provider, game, gamePlayers);
+                }
+              },
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addRound),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2E7D32),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+                    const SizedBox(height: 8),
+                  ],
                   OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.redAccent,
@@ -354,6 +422,97 @@ class _ScoreScreenState extends State<ScoreScreen> {
     );
   }
 
+  void _showDynamicScoreDialog(
+    BuildContext context,
+    GameProvider provider,
+    Game game,
+    String playerId,
+    int roundIndex,
+    int? currentScore,
+
+    List<Player> players,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final fields = game.fields!;
+    final controllers = <String, TextEditingController>{};
+    
+    // Pré-remplir si des données existent déjà
+    Map<String, int>? existingData;
+    if (game.roundData != null &&
+        game.roundData!.containsKey(playerId) &&
+        roundIndex < game.roundData![playerId]!.length) {
+      existingData = game.roundData![playerId]![roundIndex];
+    }
+    
+    for (var field in fields) {
+      final initialValue = existingData?[field.key]?.toString() ?? '';
+      controllers[field.key] = TextEditingController(text: initialValue);
+    }
+
+    final title = (game.roundLabels != null && roundIndex < game.roundLabels!.length)
+        ? game.roundLabels![roundIndex]
+        : '${l10n.round} ${roundIndex + 1}';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: fields.map((field) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextField(
+                  controller: controllers[field.key],
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: field.label,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final inputs = <String, int>{};
+              bool allValid = true;
+              
+              for (var field in fields) {
+                final text = controllers[field.key]!.text;
+                final val = text.isEmpty ? 0 : int.tryParse(text);
+                if (val == null) {
+                  allValid = false;
+                  break;
+                }
+                inputs[field.key] = val;
+              }
+
+              if (allValid) {
+                final score = provider.calculateDynamicScore(game.scoreFormula ?? '', inputs, roundIndex: roundIndex, rules: game.scoringRules);
+                provider.updateRoundData(game.id, playerId, roundIndex, inputs, score);
+                Navigator.pop(ctx);
+                _checkEndGameConditions(context, game, players, provider);
+              } else {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  const SnackBar(content: Text('Veuillez entrer des nombres valides')),
+                );
+              }
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _editScore(
       BuildContext context,
       GameProvider provider,
@@ -363,8 +522,37 @@ class _ScoreScreenState extends State<ScoreScreen> {
       int? currentScore,
       List<Player> players) {
     final l10n = AppLocalizations.of(context);
-    final controller =
-        TextEditingController(text: currentScore?.toString() ?? '');
+
+    // Vérifier si c'est un mode expert (basé sur le preset utilisé pour créer la game ?)
+    // Le modèle Game ne stocke pas directement le preset, mais on peut déduire si c'est expert
+    // si on a accès aux champs. Mais Game n'a pas les champs, GamePreset les a.
+    // Il faudrait que Game stocke aussi les définitions de champs ou l'ID du preset pour le retrouver.
+    // Ou alors on considère que si game.roundData est utilisé, c'est expert, mais on a besoin des définitions (labels) pour l'UI.
+    // Solution rapide : Chercher le preset correspondant au titre ou ajouter fields à Game.
+    // Ajoutons fields à Game pour être autonome.
+    // Pour l'instant, on va chercher dans les presets si on trouve un match par titre/config, 
+    // ou mieux : on met à jour Game pour stocker `fields` et `scoreFormula`.
+    
+    // Attente : Je dois modifier Game pour stocker fields et scoreFormula, sinon on perd la config si le preset est supprimé.
+    // Pour l'instant, je vais supposer que je peux récupérer le preset via le provider si je stockais l'ID du preset dans Game.
+    // Mais je n'ai pas stocké l'ID.
+    
+    // Alternative : Je vais modifier Game pour inclure scoreFormula et fields. C'est plus robuste.
+    // Je vais faire ça dans une étape suivante si nécessaire. Pour l'instant, je vais essayer de trouver le preset.
+    // Si pas trouvé, fallback sur standard.
+    
+    if (game.fields != null && (game.scoreFormula != null || (game.scoringRules != null && game.scoringRules!.isNotEmpty))) {
+      _showDynamicScoreDialog(context, provider, game, playerId, roundIndex, currentScore, players);
+      return;
+    }
+
+    if (game.type == GameType.skullKing) {
+      _showSkullKingDialog(context, provider, game, playerId, roundIndex, currentScore, players);
+      return;
+    }
+
+    final controller = TextEditingController(
+        text: currentScore != null ? currentScore.toString() : '');
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -383,6 +571,63 @@ class _ScoreScreenState extends State<ScoreScreen> {
             onPressed: () => _submitEdit(context, ctx, provider, game, playerId,
                 roundIndex, controller.text, players),
             child: Text(l10n.validate),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSkullKingDialog(
+    BuildContext context,
+    GameProvider provider,
+    Game game,
+    String playerId,
+    int roundIndex,
+    int? currentScore,
+    List<Player> players,
+  ) {
+    final bidController = TextEditingController();
+    final tricksController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Skull King - Manche ${roundIndex + 1}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: bidController,
+              decoration: const InputDecoration(labelText: 'Pari (Bid)'),
+              keyboardType: TextInputType.number,
+              autofocus: true,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: tricksController,
+              decoration: const InputDecoration(labelText: 'Plis réalisés (Tricks)'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final bid = int.tryParse(bidController.text);
+              final tricks = int.tryParse(tricksController.text);
+              
+              if (bid != null && tricks != null) {
+                final score = provider.calculateSkullKingScore(bid, tricks, roundIndex);
+                provider.updateScore(game.id, playerId, roundIndex, score);
+              }
+              Navigator.pop(ctx);
+              _checkEndGameConditions(context, game, players, provider);
+            },
+            child: const Text('Calculer'),
           ),
         ],
       ),
@@ -412,7 +657,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
 
   void _checkEndGameConditions(BuildContext context, Game game,
       List<Player> players, GameProvider provider) {
-    if (game.targetRounds != null) {
+    if (game.targetRounds != null && game.roundLabels == null) {
       final currentRounds = game.scores[players.first.id]?.length ?? 0;
       if (currentRounds >= game.targetRounds!) {
         // On termine automatiquement la partie si max tours atteint
