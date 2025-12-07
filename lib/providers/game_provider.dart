@@ -31,6 +31,8 @@ class GameProvider extends ChangeNotifier {
     String? scoreFormula,
     List<ScoringRule>? scoringRules,
     bool isCustom = true,
+    int? minPlayers,
+    int? maxPlayers,
   }) async {
     final preset = GamePreset(
       id: _uuid.v4(),
@@ -44,6 +46,8 @@ class GameProvider extends ChangeNotifier {
       fields: fields,
       scoreFormula: scoreFormula,
       scoringRules: scoringRules,
+      minPlayers: minPlayers,
+      maxPlayers: maxPlayers,
     );
     await _presetBox.put(preset.id, preset);
     await _presetBox.put(preset.id, preset);

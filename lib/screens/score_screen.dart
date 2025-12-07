@@ -494,6 +494,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
                 }
                 inputs[field.key] = val;
               }
+              
+              // Add player count to inputs
+              inputs['playerCount'] = players.length;
 
               if (allValid) {
                 final score = provider.calculateDynamicScore(game.scoreFormula ?? '', inputs, roundIndex: roundIndex, rules: game.scoringRules);

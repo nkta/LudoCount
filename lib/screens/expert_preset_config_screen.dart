@@ -21,6 +21,8 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
   
   final List<ScoreFieldDefinition> _fields = [];
   final _roundsController = TextEditingController();
+  final _minPlayersController = TextEditingController();
+  final _maxPlayersController = TextEditingController();
   final _roundLabelsController = TextEditingController();
   bool _isInverseScore = false;
   bool _useCustomRoundLabels = false;
@@ -37,6 +39,12 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
       _isInverseScore = p.isInverseScore;
       if (p.targetRounds != null) {
         _roundsController.text = p.targetRounds.toString();
+      }
+      if (p.minPlayers != null) {
+        _minPlayersController.text = p.minPlayers.toString();
+      }
+      if (p.maxPlayers != null) {
+        _maxPlayersController.text = p.maxPlayers.toString();
       }
       if (p.fields != null) {
         _fields.addAll(p.fields!);
@@ -290,6 +298,30 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _minPlayersController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Joueurs Min',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: _maxPlayersController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Joueurs Max',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               value: _useCustomRoundLabels,
@@ -361,6 +393,8 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
                   roundLabels: roundLabels,
                   isCustom: true,
                   type: widget.preset?.type ?? GameType.standard,
+                  minPlayers: int.tryParse(_minPlayersController.text),
+                  maxPlayers: int.tryParse(_maxPlayersController.text),
                 );
 
                 Provider.of<GameProvider>(context, listen: false).savePreset(newPreset);
@@ -391,7 +425,7 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
               Text('Définissez les variables que vous saisirez à chaque tour (ex: "bid" pour pari, "tricks" pour plis).'),
               SizedBox(height: 8),
               Text('Variables prédéfinies:', style: TextStyle(fontStyle: FontStyle.italic)),
-              Text('- round: Numéro du tour actuel (1, 2, 3...)\n- index: Index du tour actuel (0, 1, 2...)'),
+              Text('- round: Numéro du tour actuel (1, 2, 3...)\n- index: Index du tour actuel (0, 1, 2...)\n- playerCount: Nombre de joueurs dans la partie'),
               SizedBox(height: 8),
               Text('2. Formules', style: TextStyle(fontWeight: FontWeight.bold)),
               Text('Utilisez ces variables pour calculer le score. Vous pouvez utiliser des opérateurs (+, -, *, /) et des fonctions mathématiques.'),

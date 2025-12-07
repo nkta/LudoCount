@@ -65,13 +65,15 @@ class GamePresetAdapter extends TypeAdapter<GamePreset> {
       fields: (fields[8] as List?)?.cast<ScoreFieldDefinition>(),
       scoreFormula: fields[9] as String?,
       scoringRules: (fields[10] as List?)?.cast<ScoringRule>(),
+      minPlayers: fields[11] as int?,
+      maxPlayers: fields[12] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, GamePreset obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -93,7 +95,11 @@ class GamePresetAdapter extends TypeAdapter<GamePreset> {
       ..writeByte(9)
       ..write(obj.scoreFormula)
       ..writeByte(10)
-      ..write(obj.scoringRules);
+      ..write(obj.scoringRules)
+      ..writeByte(11)
+      ..write(obj.minPlayers)
+      ..writeByte(12)
+      ..write(obj.maxPlayers);
   }
 
   @override

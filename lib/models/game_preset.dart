@@ -21,6 +21,18 @@ class ScoreFieldDefinition extends HiveObject {
   final String label; // ex: 'Pari', 'Plis'
 
   ScoreFieldDefinition({required this.key, required this.label});
+
+  Map<String, dynamic> toJson() => {
+        'key': key,
+        'label': label,
+      };
+
+  factory ScoreFieldDefinition.fromJson(Map<String, dynamic> json) {
+    return ScoreFieldDefinition(
+      key: json['key'] as String,
+      label: json['label'] as String,
+    );
+  }
 }
 
 @HiveType(typeId: 2)
@@ -58,6 +70,12 @@ class GamePreset extends HiveObject {
   @HiveField(10)
   final List<ScoringRule>? scoringRules;
 
+  @HiveField(11)
+  final int? minPlayers;
+
+  @HiveField(12)
+  final int? maxPlayers;
+
   GamePreset({
     required this.id,
     required this.title,
@@ -70,7 +88,47 @@ class GamePreset extends HiveObject {
     this.fields,
     this.scoreFormula,
     this.scoringRules,
+    this.minPlayers,
+    this.maxPlayers,
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'isInverseScore': isInverseScore,
+        'targetScore': targetScore,
+        'targetRounds': targetRounds,
+        'isCustom': isCustom,
+        'type': type.index,
+        'roundLabels': roundLabels,
+        'fields': fields?.map((f) => f.toJson()).toList(),
+        'scoreFormula': scoreFormula,
+        'scoringRules': scoringRules?.map((r) => r.toJson()).toList(),
+        'minPlayers': minPlayers,
+        'maxPlayers': maxPlayers,
+      };
+
+  factory GamePreset.fromJson(Map<String, dynamic> json) {
+    return GamePreset(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      isInverseScore: json['isInverseScore'] as bool,
+      targetScore: json['targetScore'] as int?,
+      targetRounds: json['targetRounds'] as int?,
+      isCustom: json['isCustom'] as bool? ?? false,
+      type: GameType.values[json['type'] as int? ?? 0],
+      roundLabels: (json['roundLabels'] as List<dynamic>?)?.cast<String>(),
+      fields: (json['fields'] as List<dynamic>?)
+          ?.map((e) => ScoreFieldDefinition.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      scoreFormula: json['scoreFormula'] as String?,
+      scoringRules: (json['scoringRules'] as List<dynamic>?)
+          ?.map((e) => ScoringRule.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      minPlayers: json['minPlayers'] as int?,
+      maxPlayers: json['maxPlayers'] as int?,
+    );
+  }
 }
 
 @HiveType(typeId: 5)
@@ -82,4 +140,16 @@ class ScoringRule extends HiveObject {
   final String formula;
 
   ScoringRule({required this.condition, required this.formula});
+
+  Map<String, dynamic> toJson() => {
+        'condition': condition,
+        'formula': formula,
+      };
+
+  factory ScoringRule.fromJson(Map<String, dynamic> json) {
+    return ScoringRule(
+      condition: json['condition'] as String,
+      formula: json['formula'] as String,
+    );
+  }
 }

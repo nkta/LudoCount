@@ -25,6 +25,8 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
   List<ScoreFieldDefinition>? _fields;
   String? _scoreFormula;
   List<ScoringRule>? _scoringRules;
+  int? _minPlayers;
+  int? _maxPlayers;
 
   @override
   void dispose() {
@@ -119,7 +121,10 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       _roundLabels = null;
                       _fields = null;
                       _scoreFormula = null;
+                      _scoreFormula = null;
                       _scoringRules = null;
+                      _minPlayers = null;
+                      _maxPlayers = null;
                     }
                   });
                 },
@@ -247,6 +252,35 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
               onPressed: _selectedPlayerIds.length < 1
                   ? null
                   : () async {
+                      if (_minPlayers != null && _selectedPlayerIds.length < _minPlayers!) {
+                        final proceed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Attention'),
+                            content: Text('Ce preset recommande au moins $_minPlayers joueurs. Voulez-vous continuer ?'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Continuer')),
+                            ],
+                          ),
+                        );
+                        if (proceed != true) return;
+                      }
+                      if (_maxPlayers != null && _selectedPlayerIds.length > _maxPlayers!) {
+                         final proceed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Attention'),
+                            content: Text('Ce preset recommande au maximum $_maxPlayers joueurs. Voulez-vous continuer ?'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Continuer')),
+                            ],
+                          ),
+                        );
+                        if (proceed != true) return;
+                      }
+
                       final rawTitle = _titleController.text.trim();
                       final dateLabel =
                           DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -301,7 +335,10 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
     _roundLabels = preset.roundLabels;
     _fields = preset.fields;
     _scoreFormula = preset.scoreFormula;
+    _scoreFormula = preset.scoreFormula;
     _scoringRules = preset.scoringRules;
+    _minPlayers = preset.minPlayers;
+    _maxPlayers = preset.maxPlayers;
   }
 
   String _presetTitle(GamePreset preset, AppLocalizations l10n) {
