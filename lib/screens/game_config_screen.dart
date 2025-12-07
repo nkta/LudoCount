@@ -20,6 +20,11 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
   String? _selectedPresetId;
   bool _initializedSelection = false;
   bool _isInverseScore = false;
+  GameType _selectedGameType = GameType.standard;
+  List<String>? _roundLabels;
+  List<ScoreFieldDefinition>? _fields;
+  String? _scoreFormula;
+  List<ScoringRule>? _scoringRules;
 
   @override
   void dispose() {
@@ -104,12 +109,17 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                 onChanged: (value) {
                   setState(() {
                     _selectedPresetId = value;
-                    final preset = presets.firstWhere((p) => p.id == value);
                     if (value != null) {
+                      final preset = presets.firstWhere((p) => p.id == value);
                       _applyPreset(preset);
                     } else {
                       // Déverrouillage: l'utilisateur peut éditer à nouveau
-                      _isInverseScore = _isInverseScore;
+                      // On garde les valeurs actuelles mais on déverrouille
+                      _selectedGameType = GameType.standard;
+                      _roundLabels = null;
+                      _fields = null;
+                      _scoreFormula = null;
+                      _scoringRules = null;
                     }
                   });
                 },
@@ -173,50 +183,59 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
             const SizedBox(height: 24),
 
             // Options
-            Text(
-              l10n.options,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.inverseScoring),
-              subtitle: Text(l10n.inverseScoringSubtitle),
-              value: _isInverseScore,
-              onChanged: isPresetLocked
-                  ? null
-                  : (val) => setState(() => _isInverseScore = val),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _maxScoreController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: l10n.maxScoreLabel,
-                      hintText: l10n.maxScoreHint,
-                      prefixIcon: const Icon(Icons.flag),
+            if (_selectedGameType == GameType.standard) ...[
+              Text(
+                l10n.options,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.inverseScoring),
+                subtitle: Text(l10n.inverseScoringSubtitle),
+                value: _isInverseScore,
+                onChanged: isPresetLocked
+                    ? null
+                    : (val) => setState(() => _isInverseScore = val),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _maxScoreController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: l10n.maxScoreLabel,
+                        hintText: l10n.maxScoreHint,
+                        prefixIcon: const Icon(Icons.flag),
+                      ),
+                      enabled: !isPresetLocked,
                     ),
-                    enabled: !isPresetLocked,
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: _maxRoundsController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: l10n.maxRoundsLabel,
-                      hintText: l10n.maxRoundsHint,
-                      prefixIcon: const Icon(Icons.repeat),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: _maxRoundsController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: l10n.maxRoundsLabel,
+                        hintText: l10n.maxRoundsHint,
+                        prefixIcon: const Icon(Icons.repeat),
+                      ),
+                      enabled: !isPresetLocked,
                     ),
-                    enabled: !isPresetLocked,
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ] else ...[
+               Text(
+                'Mode de jeu: ${_selectedGameType == GameType.sevenWonders ? "7 Wonders" : "Skull King"}',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('Les options sont configurées automatiquement pour ce mode de jeu.'),
+            ],
 
             const SizedBox(height: 40),
 
@@ -250,6 +269,11 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                         _isInverseScore,
                         targetScore: targetScore,
                         targetRounds: targetRounds,
+                        type: _selectedGameType,
+                        roundLabels: _roundLabels,
+                        fields: _fields,
+                        scoreFormula: _scoreFormula,
+                        scoringRules: _scoringRules,
                       );
                       if (mounted) {
                         Navigator.pushReplacementNamed(
@@ -273,6 +297,11 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
         preset.targetScore != null ? '${preset.targetScore}' : '';
     _maxRoundsController.text =
         preset.targetRounds != null ? '${preset.targetRounds}' : '';
+    _selectedGameType = preset.type;
+    _roundLabels = preset.roundLabels;
+    _fields = preset.fields;
+    _scoreFormula = preset.scoreFormula;
+    _scoringRules = preset.scoringRules;
   }
 
   String _presetTitle(GamePreset preset, AppLocalizations l10n) {

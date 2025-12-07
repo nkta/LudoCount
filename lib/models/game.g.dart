@@ -27,13 +27,23 @@ class GameAdapter extends TypeAdapter<Game> {
       isFinished: fields[6] as bool,
       targetScore: fields[7] as int?,
       targetRounds: fields[8] as int?,
+      type: fields[9] as GameType,
+      roundLabels: (fields[10] as List?)?.cast<String>(),
+      roundData: (fields[11] as Map?)?.map((dynamic k, dynamic v) => MapEntry(
+          k as String,
+          (v as List)
+              .map((dynamic e) => (e as Map?)?.cast<String, int>())
+              .toList())),
+      fields: (fields[12] as List?)?.cast<ScoreFieldDefinition>(),
+      scoreFormula: fields[13] as String?,
+      scoringRules: (fields[14] as List?)?.cast<ScoringRule>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Game obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -51,7 +61,19 @@ class GameAdapter extends TypeAdapter<Game> {
       ..writeByte(7)
       ..write(obj.targetScore)
       ..writeByte(8)
-      ..write(obj.targetRounds);
+      ..write(obj.targetRounds)
+      ..writeByte(9)
+      ..write(obj.type)
+      ..writeByte(10)
+      ..write(obj.roundLabels)
+      ..writeByte(11)
+      ..write(obj.roundData)
+      ..writeByte(12)
+      ..write(obj.fields)
+      ..writeByte(13)
+      ..write(obj.scoreFormula)
+      ..writeByte(14)
+      ..write(obj.scoringRules);
   }
 
   @override

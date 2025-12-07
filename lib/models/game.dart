@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'game_preset.dart';
 
 part 'game.g.dart';
 
@@ -31,6 +32,24 @@ class Game extends HiveObject {
   @HiveField(8)
   int? targetRounds;
 
+  @HiveField(9)
+  final GameType type;
+
+  @HiveField(10)
+  final List<String>? roundLabels;
+
+  @HiveField(11)
+  Map<String, List<Map<String, int>?>>? roundData;
+
+  @HiveField(12)
+  final List<ScoreFieldDefinition>? fields;
+
+  @HiveField(13)
+  final String? scoreFormula;
+
+  @HiveField(14)
+  final List<ScoringRule>? scoringRules;
+
   Game({
     required this.id,
     required this.title,
@@ -41,5 +60,11 @@ class Game extends HiveObject {
     this.isFinished = false,
     this.targetScore,
     this.targetRounds,
+    this.type = GameType.standard,
+    this.roundLabels,
+    this.roundData,
+    this.fields,
+    this.scoreFormula,
+    this.scoringRules,
   });
 }

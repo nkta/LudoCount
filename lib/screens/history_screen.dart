@@ -56,7 +56,16 @@ class HistoryScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _confirmDelete(context, game.id),
+                      ),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
                   onTap: () {
                     Navigator.pushNamed(context, '/score', arguments: game.id);
                   },
@@ -67,5 +76,30 @@ class HistoryScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, String gameId) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteGameTitle),
+        content: Text(l10n.deleteGameContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await Provider.of<GameProvider>(context, listen: false).deleteGame(gameId);
+    }
   }
 }

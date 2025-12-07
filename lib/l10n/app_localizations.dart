@@ -95,6 +95,10 @@ class AppLocalizations {
       'historyTitle': 'Historique des parties',
       'noGamesRecorded': 'Aucune partie enregistrée.',
       'playersCount': '{count} Joueurs',
+      'deleteGameTitle': 'Supprimer la partie ?',
+      'deleteGameContent': 'Cette action est irréversible.',
+      'round': 'Tour',
+      'save': 'Enregistrer',
     },
     'en': {
       'appTitle': 'LudoCount',
@@ -171,6 +175,10 @@ class AppLocalizations {
       'historyTitle': 'Game history',
       'noGamesRecorded': 'No games recorded.',
       'playersCount': '{count} Players',
+      'deleteGameTitle': 'Delete game?',
+      'deleteGameContent': 'This action cannot be undone.',
+      'round': 'Round',
+      'save': 'Save',
     },
     'es': {
       'appTitle': 'LudoCount',
@@ -246,6 +254,10 @@ class AppLocalizations {
       'historyTitle': 'Historial de partidas',
       'noGamesRecorded': 'No hay partidas registradas.',
       'playersCount': '{count} Jugadores',
+      'deleteGameTitle': '¿Eliminar partida?',
+      'deleteGameContent': 'Esta acción no se puede deshacer.',
+      'round': 'Ronda',
+      'save': 'Guardar',
     },
     'de': {
       'appTitle': 'LudoCount',
@@ -321,6 +333,10 @@ class AppLocalizations {
       'historyTitle': 'Partienverlauf',
       'noGamesRecorded': 'Keine Partien gespeichert.',
       'playersCount': '{count} Spieler',
+      'deleteGameTitle': 'Spiel löschen?',
+      'deleteGameContent': 'Diese Aktion kann nicht rückgängig gemacht werden.',
+      'round': 'Runde',
+      'save': 'Speichern',
     },
   };
 
@@ -408,6 +424,10 @@ class AppLocalizations {
   String get noGamesRecorded => _t('noGamesRecorded');
   String playersCount(int count) =>
       _t('playersCount').replaceFirst('{count}', '$count');
+  String get deleteGameTitle => _t('deleteGameTitle');
+  String get deleteGameContent => _t('deleteGameContent');
+  String get round => _t('round');
+  String get save => _t('save');
 }
 
 class _AppLocalizationsDelegate

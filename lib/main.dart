@@ -14,6 +14,7 @@ import 'screens/score_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/player_list_screen.dart';
 import 'screens/preset_screen.dart';
+import 'utils/preset_seeder.dart';
 
 void main() async {
   // Initialisation de Hive
@@ -23,11 +24,19 @@ void main() async {
   Hive.registerAdapter(GamePresetAdapter());
   Hive.registerAdapter(PlayerAdapter());
   Hive.registerAdapter(GameAdapter());
+  Hive.registerAdapter(GameTypeAdapter());
+  Hive.registerAdapter(ScoreFieldDefinitionAdapter());
+  Hive.registerAdapter(ScoringRuleAdapter());
 
   // Ouverture des boîtes
   await Hive.openBox<GamePreset>('presets');
   await Hive.openBox<Player>('players');
   await Hive.openBox<Game>('games');
+
+  // Seeding
+  final gameProvider = GameProvider();
+  await PresetSeeder.seedAkropolis(gameProvider);
+  await PresetSeeder.seedLuz(gameProvider);
 
   runApp(const LudoCountApp());
 }
