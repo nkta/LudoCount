@@ -32,6 +32,8 @@ class PresetSeeder {
       scoreFormula: formula,
       targetRounds: 6,
       roundLabels: roundLabels,
+      minPlayers: 2,
+      maxPlayers: 4,
     );
   }
 
@@ -71,7 +73,13 @@ class PresetSeeder {
       fields: fields,
       scoringRules: rules,
       targetRounds: 4,
-      isCustom: true, // Mark as custom so it's editable/deletable if needed, or false if it should be fixed
+      isCustom: true,
+      minPlayers: 3,
+      maxPlayers: 5,
     );
   }
+
+
+
+
 }

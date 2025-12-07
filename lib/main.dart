@@ -38,6 +38,7 @@ void main() async {
   await PresetSeeder.seedAkropolis(gameProvider);
   await PresetSeeder.seedLuz(gameProvider);
 
+
   runApp(const LudoCountApp());
 }
 
