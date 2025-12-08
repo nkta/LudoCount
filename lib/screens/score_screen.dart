@@ -105,8 +105,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
           )
         ],
       ),
-      body: Column(
-        children: [
+      body: SafeArea(
+        child: Column(
+          children: [
           // --- TABLEAU (Header + Body) ---
           Expanded(
             child: SingleChildScrollView(
@@ -370,6 +371,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

@@ -249,7 +249,7 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
                           onChanged: (val) {
                             // Hack pour mettre à jour l'objet sans redessiner tout le widget tree à chaque caractère
                             // Idéalement on utiliserait des controllers dédiés pour chaque règle
-                            _rules[index] = ScoringRule(condition: val, formula: rule.formula);
+                            _rules[index] = ScoringRule(condition: val, formula: _rules[index].formula);
                           },
                         ),
                         const SizedBox(height: 8),
@@ -263,7 +263,7 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
                           controller: TextEditingController(text: rule.formula)
                             ..selection = TextSelection.fromPosition(TextPosition(offset: rule.formula.length)),
                           onChanged: (val) {
-                            _rules[index] = ScoringRule(condition: rule.condition, formula: val);
+                            _rules[index] = ScoringRule(condition: _rules[index].condition, formula: val);
                           },
                         ),
                       ],

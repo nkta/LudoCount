@@ -13,68 +13,70 @@ class HomeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.appTitle)),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Spacer(),
-            _buildMenuButton(
-              context,
-              label: l10n.continueLabel,
-              color: const Color(0xFF66BB6A),
-              onPressed: () => _continueLastGame(context),
-            ),
-            const SizedBox(height: 16),
-            _buildMenuButton(
-              context,
-              label: l10n.newGame,
-              color: const Color(0xFFFFA726),
-              onPressed: () => Navigator.pushNamed(context, '/config'),
-            ),
-            const SizedBox(height: 16),
-            _buildMenuButton(
-              context,
-              label: l10n.presets.toUpperCase(),
-              color: const Color(0xFF8E24AA),
-              onPressed: () => Navigator.pushNamed(context, '/presets'),
-            ),
-            const SizedBox(height: 16),
-            _buildMenuButton(
-              context,
-              label: l10n.history,
-              color: const Color(0xFFEF5350),
-              onPressed: () => Navigator.pushNamed(context, '/history'),
-            ),
-            const SizedBox(height: 16),
-            _buildMenuButton(
-              context,
-              label: l10n.players,
-              color: const Color(0xFF42A5F5),
-              onPressed: () => Navigator.pushNamed(context, '/players'),
-            ),
-            const SizedBox(height: 16),
-            _buildMenuButton(
-              context,
-              label: l10n.diceRoller.toUpperCase(),
-              color: const Color(0xFF26A69A),
-              icon: Icons.casino,
-              onPressed: () => showDialog(
-                context: context,
-                builder: (context) => const DiceRollDialog(),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Spacer(),
+              _buildMenuButton(
+                context,
+                label: l10n.continueLabel,
+                color: const Color(0xFF66BB6A),
+                onPressed: () => _continueLastGame(context),
               ),
-            ),
-            const SizedBox(height: 16),
-            _buildMenuButton(
-              context,
-              label: 'Soutenir le dev',
-              color: Colors.pinkAccent,
-              icon: Icons.coffee,
-              onPressed: () => _launchDonationUrl(),
-            ),
-            const Spacer(),
-          ],
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                label: l10n.newGame,
+                color: const Color(0xFFFFA726),
+                onPressed: () => Navigator.pushNamed(context, '/config'),
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                label: l10n.presets.toUpperCase(),
+                color: const Color(0xFF8E24AA),
+                onPressed: () => Navigator.pushNamed(context, '/presets'),
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                label: l10n.history,
+                color: const Color(0xFFEF5350),
+                onPressed: () => Navigator.pushNamed(context, '/history'),
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                label: l10n.players,
+                color: const Color(0xFF42A5F5),
+                onPressed: () => Navigator.pushNamed(context, '/players'),
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                label: l10n.diceRoller.toUpperCase(),
+                color: const Color(0xFF26A69A),
+                icon: Icons.casino,
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) => const DiceRollDialog(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildMenuButton(
+                context,
+                label: 'Soutenir le dev',
+                color: Colors.pinkAccent,
+                icon: Icons.coffee,
+                onPressed: () => _launchDonationUrl(),
+              ),
+              const Spacer(),
+            ],
+          ),
         ),
       ),
     );
