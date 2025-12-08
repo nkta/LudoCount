@@ -8,9 +8,9 @@ import '../models/player.dart';
 import '../models/game_preset.dart';
 
 class GameProvider extends ChangeNotifier {
-  final Box<Player> _playerBox = Hive.box<Player>('players');
-  final Box<Game> _gameBox = Hive.box<Game>('games');
-  final Box<GamePreset> _presetBox = Hive.box<GamePreset>('presets');
+  Box<Player> get _playerBox => Hive.box<Player>('players');
+  Box<Game> get _gameBox => Hive.box<Game>('games');
+  Box<GamePreset> get _presetBox => Hive.box<GamePreset>('presets');
   final Uuid _uuid = const Uuid();
 
   List<Player> get players => _playerBox.values.toList();
@@ -19,6 +19,14 @@ class GameProvider extends ChangeNotifier {
 
   // --- Presets ---
   List<GamePreset> get presets => _presetBox.values.toList();
+
+  // --- Dice State ---
+  int _diceCount = 1;
+  int get diceCount => _diceCount;
+  void setDiceCount(int count) {
+    _diceCount = count;
+    notifyListeners();
+  }
 
   Future<void> addPreset({
     required String title,

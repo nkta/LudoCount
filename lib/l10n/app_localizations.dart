@@ -99,6 +99,10 @@ class AppLocalizations {
       'deleteGameContent': 'Cette action est irréversible.',
       'round': 'Tour',
       'save': 'Enregistrer',
+      'diceRoller': 'Lancer de dés',
+      'numberOfDice': 'Nombre de dés',
+      'rollDice': 'Lancer',
+      'total': 'Total',
     },
     'en': {
       'appTitle': 'LudoCount',
@@ -179,6 +183,10 @@ class AppLocalizations {
       'deleteGameContent': 'This action cannot be undone.',
       'round': 'Round',
       'save': 'Save',
+      'diceRoller': 'Dice Roller',
+      'numberOfDice': 'Number of dice',
+      'rollDice': 'Roll',
+      'total': 'Total',
     },
     'es': {
       'appTitle': 'LudoCount',
@@ -258,6 +266,10 @@ class AppLocalizations {
       'deleteGameContent': 'Esta acción no se puede deshacer.',
       'round': 'Ronda',
       'save': 'Guardar',
+      'diceRoller': 'Lanzar dados',
+      'numberOfDice': 'Número de dados',
+      'rollDice': 'Lanzar',
+      'total': 'Total',
     },
     'de': {
       'appTitle': 'LudoCount',
@@ -337,6 +349,10 @@ class AppLocalizations {
       'deleteGameContent': 'Diese Aktion kann nicht rückgängig gemacht werden.',
       'round': 'Runde',
       'save': 'Speichern',
+      'diceRoller': 'Würfeln',
+      'numberOfDice': 'Anzahl der Würfel',
+      'rollDice': 'Würfeln',
+      'total': 'Gesamt',
     },
   };
 
@@ -428,6 +444,10 @@ class AppLocalizations {
   String get deleteGameContent => _t('deleteGameContent');
   String get round => _t('round');
   String get save => _t('save');
+  String get diceRoller => _t('diceRoller');
+  String get numberOfDice => _t('numberOfDice');
+  String get rollDice => _t('rollDice');
+  String get total => _t('total');
 }
 
 class _AppLocalizationsDelegate

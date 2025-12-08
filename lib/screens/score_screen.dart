@@ -5,6 +5,7 @@ import '../models/game.dart';
 import '../models/player.dart';
 import '../models/game_preset.dart';
 import '../l10n/app_localizations.dart';
+import 'dice_roll_screen.dart';
 
 class ScoreScreen extends StatefulWidget {
   final String gameId;
@@ -86,6 +87,13 @@ class _ScoreScreenState extends State<ScoreScreen> {
       appBar: AppBar(
         title: Text(game.title),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.casino),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => const DiceRollDialog(),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.leaderboard),
             onPressed: () =>

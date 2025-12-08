@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dice_roll_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -52,6 +53,17 @@ class HomeScreen extends StatelessWidget {
               label: l10n.players,
               color: const Color(0xFF42A5F5),
               onPressed: () => Navigator.pushNamed(context, '/players'),
+            ),
+            const SizedBox(height: 16),
+            _buildMenuButton(
+              context,
+              label: l10n.diceRoller.toUpperCase(),
+              color: const Color(0xFF26A69A),
+              icon: Icons.casino,
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => const DiceRollDialog(),
+              ),
             ),
             const SizedBox(height: 16),
             _buildMenuButton(
