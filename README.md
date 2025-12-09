@@ -55,10 +55,6 @@ Ce projet est développé avec **Flutter** et utilise plusieurs packages clés :
     flutter run
     ```
 
-## 🤝 Contribuer
-
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request pour suggérer des améliorations.
-
 ## ☕ Soutenir le projet
 
 Si vous aimez LudoCount, vous pouvez soutenir le développement en m'offrant un café via le lien intégré dans l'application ou directement ici : [Buy Me a Coffee](https://buymeacoffee.com/nkta1).
