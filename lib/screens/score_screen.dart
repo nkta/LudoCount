@@ -177,7 +177,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
                                     width: columnWidth,
                                     child: InkWell(
                                       onTap: () {
-                                        if (!game.isFinished) {
+                                        if (!game.isFinished || game.fields != null) {
                                           _editScore(context, provider, game,
                                               player.id, index, score, gamePlayers);
                                         }
@@ -266,7 +266,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
                   if (game.roundLabels == null) ...[
                     ElevatedButton.icon(
               onPressed: () {
-                if (game.isFinished) return;
+                if (game.isFinished && game.fields == null) return;
                 
                 // Vérifier si c'est un mode expert
                 if (game.fields != null) {
@@ -670,6 +670,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
 
   void _checkEndGameConditions(BuildContext context, Game game,
       List<Player> players, GameProvider provider) {
+    // Ne pas terminer automatiquement les parties expertes
+    if (game.fields != null) return;
+
     if (game.targetRounds != null && game.roundLabels == null) {
       final currentRounds = game.scores[players.first.id]?.length ?? 0;
       if (currentRounds >= game.targetRounds!) {

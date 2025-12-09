@@ -1,4 +1,4 @@
-package com.example.ludocount
+package com.ludocount.app
 
 import io.flutter.embedding.android.FlutterActivity
 
