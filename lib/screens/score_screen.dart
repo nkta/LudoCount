@@ -200,19 +200,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
                                                   final data = game.roundData![player.id]![index]!;
                                                   if (game.fields != null) {
                                                     // Affichage avec libellés pour Expert Mode
-                                                    return Column(
-                                                      children: game.fields!.map((field) {
-                                                        final val = data[field.key] ?? 0;
-                                                        if (val == 0) return const SizedBox.shrink(); // Masquer si 0 pour alléger
-                                                        return Text(
-                                                          '${field.label}: $val',
-                                                          style: const TextStyle(
-                                                            fontSize: 10,
-                                                            color: Colors.grey,
-                                                          ),
-                                                        );
-                                                      }).toList(),
-                                                    );
+                                                    // Affichage avec libellés pour Expert Mode
+                                                    // MODIFICATION: On ne veut plus afficher les détails, juste le score total (déjà affiché au dessus)
+                                                    return const SizedBox.shrink();
                                                   } else {
                                                     // Fallback ancien affichage
                                                     return Text(
