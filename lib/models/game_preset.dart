@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
 
 part 'game_preset.g.dart';
 
@@ -131,25 +132,70 @@ class GamePreset extends HiveObject {
   }
 }
 
+// ScoringRule model
 @HiveType(typeId: 5)
 class ScoringRule extends HiveObject {
   @HiveField(0)
   final String condition;
 
   @HiveField(1)
-  final String formula;
+  final String? formula;
 
-  ScoringRule({required this.condition, required this.formula});
+  @HiveField(2)
+  final List<ScoringRule>? rules;
+
+  @HiveField(3)
+  final String id;
+
+  ScoringRule({
+    required this.condition,
+    this.formula,
+    this.rules,
+    String? id,
+  }) : id = id ?? const Uuid().v4();
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'condition': condition,
         'formula': formula,
+        'rules': rules?.map((r) => r.toJson()).toList(),
       };
 
   factory ScoringRule.fromJson(Map<String, dynamic> json) {
     return ScoringRule(
+      id: json['id'] as String?,
       condition: json['condition'] as String,
-      formula: json['formula'] as String,
+      formula: json['formula'] as String?,
+      rules: (json['rules'] as List<dynamic>?)
+          ?.map((e) => ScoringRule.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScoringRule &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          condition == other.condition &&
+          formula == other.formula &&
+          _listEquals(rules, other.rules);
+
+  @override
+  int get hashCode => id.hashCode ^ condition.hashCode ^ formula.hashCode ^ _listHashCode(rules);
+
+  bool _listEquals<T>(List<T>? a, List<T>? b) {
+    if (a == null) return b == null;
+    if (b == null || a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  int _listHashCode<T>(List<T>? list) {
+    if (list == null) return 0;
+    return list.fold(0, (prev, element) => prev ^ element.hashCode);
   }
 }

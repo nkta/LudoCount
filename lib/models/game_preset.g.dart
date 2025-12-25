@@ -125,18 +125,24 @@ class ScoringRuleAdapter extends TypeAdapter<ScoringRule> {
     };
     return ScoringRule(
       condition: fields[0] as String,
-      formula: fields[1] as String,
+      formula: fields[1] as String?,
+      rules: (fields[2] as List?)?.cast<ScoringRule>(),
+      id: fields[3] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ScoringRule obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.condition)
       ..writeByte(1)
-      ..write(obj.formula);
+      ..write(obj.formula)
+      ..writeByte(2)
+      ..write(obj.rules)
+      ..writeByte(3)
+      ..write(obj.id);
   }
 
   @override

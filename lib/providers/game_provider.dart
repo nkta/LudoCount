@@ -143,28 +143,40 @@ class GameProvider extends ChangeNotifier {
 
       // Si des règles sont définies, on les utilise en priorité
       if (rules != null && rules.isNotEmpty) {
-        for (final rule in rules) {
-          try {
-            // Évalue la condition
-            final conditionExpr = Expression.parse(rule.condition);
-            final conditionResult = evaluator.eval(conditionExpr, context);
+        int evaluateRecursive(List<ScoringRule> currentRules) {
+          for (final rule in currentRules) {
+            try {
+              // Évalue la condition
+              final conditionExpr = Expression.parse(rule.condition);
+              final conditionResult = evaluator.eval(conditionExpr, context);
 
-            if (conditionResult == true) {
-              // Si la condition est vraie, on évalue la formule associée
-              final formulaExpr = Expression.parse(rule.formula);
-              final result = evaluator.eval(formulaExpr, context);
-              if (result is num) {
-                return result.round();
+              if (conditionResult == true) {
+                // Si la condition est vraie...
+                
+                // 1. Vérifier s'il y a des sous-règles
+                if (rule.rules != null && rule.rules!.isNotEmpty) {
+                  return evaluateRecursive(rule.rules!);
+                }
+                
+                // 2. Sinon évaluer la formule associée (si elle existe)
+                if (rule.formula != null && rule.formula!.isNotEmpty) {
+                  final formulaExpr = Expression.parse(rule.formula!);
+                  final result = evaluator.eval(formulaExpr, context);
+                  if (result is num) {
+                    return result.round();
+                  }
+                }
+                return 0;
               }
-              return 0;
+            } catch (e) {
+              print('Erreur dans la règle "${rule.condition}": $e');
+              continue; // Passe à la règle suivante en cas d'erreur
             }
-          } catch (e) {
-            print('Erreur dans la règle "${rule.condition}": $e');
-            continue; // Passe à la règle suivante en cas d'erreur
           }
+          return 0;
         }
-        // Si aucune règle ne correspond (et pas de "else" explicite capturé par une condition true), retourne 0
-        return 0;
+
+        return evaluateRecursive(rules);
       }
 
       // Sinon, utilise la formule unique classique

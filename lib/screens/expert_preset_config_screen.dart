@@ -4,7 +4,8 @@ import '../providers/game_provider.dart';
 import '../models/game_preset.dart';
 import 'package:uuid/uuid.dart';
 import '../l10n/app_localizations.dart';
-
+import '../widgets/scoring_rule_editor.dart';
+import '../widgets/formula_toolbar.dart';
 class ExpertPresetConfigScreen extends StatefulWidget {
   final GamePreset? preset;
   const ExpertPresetConfigScreen({super.key, this.preset});
@@ -30,9 +31,18 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
   final _fieldKeyController = TextEditingController();
   final _fieldLabelController = TextEditingController();
 
+
+  TextEditingController? _activeController;
+  final FocusNode _simpleFormulaFocus = FocusNode();
+  bool _showToolbar = true;
   @override
   void initState() {
     super.initState();
+    _simpleFormulaFocus.addListener(() {
+      if (_simpleFormulaFocus.hasFocus) {
+        setState(() => _activeController = _formulaController);
+      }
+    });
     if (widget.preset != null) {
       final p = widget.preset!;
       _titleController.text = p.title;
@@ -60,6 +70,28 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
         _roundLabelsController.text = p.roundLabels!.join('\n');
         _useCustomRoundLabels = true;
       }
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _formulaController.dispose();
+    _roundsController.dispose();
+    _minPlayersController.dispose();
+    _maxPlayersController.dispose();
+    _roundLabelsController.dispose();
+    _fieldKeyController.dispose();
+    _fieldLabelController.dispose();
+    _simpleFormulaFocus.dispose();
+    super.dispose();
+  }
+  
+  void _handleFocus(TextEditingController controller) {
+    if (_activeController != controller) {
+      setState(() {
+        _activeController = controller;
+      });
     }
   }
 
@@ -119,20 +151,51 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
         title: const Text('Mode Expert'),
         actions: [
           IconButton(
+            icon: Icon(_showToolbar ? Icons.keyboard_hide : Icons.keyboard),
+            tooltip: _showToolbar ? 'Masquer les opérateurs' : 'Afficher les opérateurs',
+            onPressed: () => setState(() => _showToolbar = !_showToolbar),
+          ),
+          IconButton(
             icon: const Icon(Icons.help_outline),
             onPressed: _showHelpDialog,
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(labelText: l10n.presetNameLabel),
+      body: Column(
+        children: [
+          if (_showToolbar)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: FormulaToolbar(
+                controller: _activeController ?? _formulaController,
+                variables: [
+                  'index', 
+                  'round', 
+                  'playerCount',
+                  ..._fields.map((f) => f.key),
+                ],
+              ),
             ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _titleController,
+                    decoration: InputDecoration(labelText: l10n.presetNameLabel),
+                  ),
             const SizedBox(height: 20),
             
             const Text('Champs de saisie', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -203,11 +266,13 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _formulaController,
+                focusNode: _simpleFormulaFocus,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Ex: bid == tricks ? (bid == 0 ? 10 : bid * 20) : (bid == 0 ? -10 : abs(tricks - bid) * -10)',
                 ),
                 maxLines: 3,
+                onTap: () => _handleFocus(_formulaController),
               ),
             ] else ...[
               const Text(
@@ -218,63 +283,24 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
               ..._rules.asMap().entries.map((entry) {
                 final index = entry.key;
                 final rule = entry.value;
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text('Règle ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.delete, size: 20, color: Colors.red),
-                              onPressed: () => _removeRule(index),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Condition (Si...)',
-                            hintText: 'ex: bid == tricks && round > 1',
-                            helperText: 'Opérateurs: ==, !=, >, <, &&, ||. Maths: abs, max...',
-                            isDense: true,
-                          ),
-                          controller: TextEditingController(text: rule.condition)
-                            ..selection = TextSelection.fromPosition(TextPosition(offset: rule.condition.length)),
-                          onChanged: (val) {
-                            // Hack pour mettre à jour l'objet sans redessiner tout le widget tree à chaque caractère
-                            // Idéalement on utiliserait des controllers dédiés pour chaque règle
-                            _rules[index] = ScoringRule(condition: val, formula: _rules[index].formula);
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Score (Alors...)',
-                            hintText: 'ex: bid * 20',
-                            helperText: 'Maths: abs, min, max, pow, sqrt, ceil, floor, rnd...',
-                            isDense: true,
-                          ),
-                          controller: TextEditingController(text: rule.formula)
-                            ..selection = TextSelection.fromPosition(TextPosition(offset: rule.formula.length)),
-                          onChanged: (val) {
-                            _rules[index] = ScoringRule(condition: _rules[index].condition, formula: val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                return ScoringRuleEditor(
+                  key: ValueKey(rule.id),
+                  rule: rule,
+                  index: index,
+                  isRoot: true,
+                  onFocus: _handleFocus,
+                  onChanged: (newRule) {
+                    setState(() {
+                      _rules[index] = newRule;
+                    });
+                  },
+                  onDelete: () => _removeRule(index),
                 );
               }),
               ElevatedButton.icon(
                 onPressed: _addRule,
                 icon: const Icon(Icons.add),
-                label: const Text('Ajouter une règle'),
+                label: const Text('Ajouter une règle principale'),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -404,6 +430,9 @@ class _ExpertPresetConfigScreenState extends State<ExpertPresetConfigScreen> {
             ),
           ],
         ),
+      ),
+            ),
+        ],
       ),
     );
   }

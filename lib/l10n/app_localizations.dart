@@ -103,6 +103,11 @@ class AppLocalizations {
       'numberOfDice': 'Nombre de dés',
       'rollDice': 'Lancer',
       'total': 'Total',
+      'statistics': 'Statistiques',
+      'totalGames': 'Parties jouées',
+      'totalPlayers': 'Joueurs uniques',
+      'mostActivePlayer': 'Joueur le plus actif',
+      'bestWinRate': 'Meilleur taux de victoire',
     },
     'en': {
       'appTitle': 'LudoCount',
@@ -187,6 +192,11 @@ class AppLocalizations {
       'numberOfDice': 'Number of dice',
       'rollDice': 'Roll',
       'total': 'Total',
+      'statistics': 'Statistics',
+      'totalGames': 'Games Played',
+      'totalPlayers': 'Total Players',
+      'mostActivePlayer': 'Most Active Player',
+      'bestWinRate': 'Best Win Rate',
     },
     'es': {
       'appTitle': 'LudoCount',
@@ -270,6 +280,11 @@ class AppLocalizations {
       'numberOfDice': 'Número de dados',
       'rollDice': 'Lanzar',
       'total': 'Total',
+      'statistics': 'Estadísticas',
+      'totalGames': 'Partidas jugadas',
+      'totalPlayers': 'Jugadores totales',
+      'mostActivePlayer': 'Jugador más activo',
+      'bestWinRate': 'Mejor tasa de victoria',
     },
     'de': {
       'appTitle': 'LudoCount',
@@ -353,6 +368,11 @@ class AppLocalizations {
       'numberOfDice': 'Anzahl der Würfel',
       'rollDice': 'Würfeln',
       'total': 'Gesamt',
+      'statistics': 'Statistiken',
+      'totalGames': 'Gespielte Spiele',
+      'totalPlayers': 'Gesamtspieler',
+      'mostActivePlayer': 'Aktivster Spieler',
+      'bestWinRate': 'Beste Gewinnrate',
     },
   };
 
@@ -448,6 +468,11 @@ class AppLocalizations {
   String get numberOfDice => _t('numberOfDice');
   String get rollDice => _t('rollDice');
   String get total => _t('total');
+  String get statistics => _t('statistics');
+  String get totalGames => _t('totalGames');
+  String get totalPlayers => _t('totalPlayers');
+  String get mostActivePlayer => _t('mostActivePlayer');
+  String get bestWinRate => _t('bestWinRate');
 }
 
 class _AppLocalizationsDelegate
