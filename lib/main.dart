@@ -1,34 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'l10n/app_localizations.dart';
-import 'models/game_preset.dart';
 
-import 'models/game.dart';
-import 'models/player.dart';
-import 'providers/game_provider.dart';
-import 'screens/home_screen.dart';
-import 'screens/game_config_screen.dart';
-import 'screens/score_screen.dart';
-import 'screens/history_screen.dart';
-import 'screens/player_list_screen.dart';
-import 'screens/preset_screen.dart';
-import 'utils/preset_seeder.dart';
+import 'data/models/game.dart';
+import 'data/models/game_preset.dart';
+import 'data/models/player.dart';
+import 'data/repositories/game_repository.dart';
+import 'data/repositories/player_repository.dart';
+import 'data/repositories/preset_repository.dart';
+import 'data/services/game_service.dart';
+import 'data/services/player_service.dart';
+import 'data/services/preset_service.dart';
+import 'domain/use_cases/calculate_score_use_case.dart';
+import 'domain/use_cases/seed_presets_use_case.dart';
+import 'l10n/app_localizations.dart';
+import 'ui/features/dice/view_models/dice_view_model.dart';
+import 'ui/features/game_config/view_models/game_config_view_model.dart';
+import 'ui/features/game_config/views/game_config_view.dart';
+import 'ui/features/history/view_models/history_view_model.dart';
+import 'ui/features/history/views/history_view.dart';
+import 'ui/features/home/view_models/home_view_model.dart';
+import 'ui/features/home/views/home_view.dart';
+import 'ui/features/players/view_models/players_view_model.dart';
+import 'ui/features/players/views/players_view.dart';
+import 'ui/features/presets/view_models/presets_view_model.dart';
+import 'ui/features/presets/views/presets_view.dart';
+import 'ui/features/score/view_models/score_view_model.dart';
+import 'ui/features/score/views/score_view.dart';
 
 void main() async {
-  // Initialisation de Hive
   await Hive.initFlutter();
-  
-  // Enable edge-to-edge
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.transparent,
     statusBarColor: Colors.transparent,
   ));
 
-  // Enregistrement des Adapters (Générés par build_runner)
   Hive.registerAdapter(GamePresetAdapter());
   Hive.registerAdapter(PlayerAdapter());
   Hive.registerAdapter(GameAdapter());
@@ -36,28 +46,52 @@ void main() async {
   Hive.registerAdapter(ScoreFieldDefinitionAdapter());
   Hive.registerAdapter(ScoringRuleAdapter());
 
-  // Ouverture des boîtes
   await Hive.openBox<GamePreset>('presets');
   await Hive.openBox<Player>('players');
   await Hive.openBox<Game>('games');
 
-  // Seeding
-  final gameProvider = GameProvider();
-  await PresetSeeder.seedAkropolis(gameProvider);
-  await PresetSeeder.seedLuz(gameProvider);
+  final playerService = PlayerService();
+  final gameService = GameService();
+  final presetService = PresetService();
 
+  final playerRepository = PlayerRepository(playerService: playerService);
+  final gameRepository = GameRepository(gameService: gameService);
+  final presetRepository = PresetRepository(presetService: presetService);
+  final calculateScoreUseCase = CalculateScoreUseCase();
 
-  runApp(const LudoCountApp());
+  await SeedPresetsUseCase(presetRepository: presetRepository).call();
+
+  runApp(LudoCountApp(
+    playerRepository: playerRepository,
+    gameRepository: gameRepository,
+    presetRepository: presetRepository,
+    calculateScoreUseCase: calculateScoreUseCase,
+  ));
 }
 
 class LudoCountApp extends StatelessWidget {
-  const LudoCountApp({super.key});
+  const LudoCountApp({
+    super.key,
+    required this.playerRepository,
+    required this.gameRepository,
+    required this.presetRepository,
+    required this.calculateScoreUseCase,
+  });
+
+  final PlayerRepository playerRepository;
+  final GameRepository gameRepository;
+  final PresetRepository presetRepository;
+  final CalculateScoreUseCase calculateScoreUseCase;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => GameProvider()),
+        ChangeNotifierProvider.value(value: playerRepository),
+        ChangeNotifierProvider.value(value: gameRepository),
+        ChangeNotifierProvider.value(value: presetRepository),
+        Provider.value(value: calculateScoreUseCase),
+        ChangeNotifierProvider(create: (_) => DiceViewModel()),
       ],
       child: MaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
@@ -72,17 +106,48 @@ class LudoCountApp extends StatelessWidget {
         supportedLocales: AppLocalizations.supportedLocales,
         initialRoute: '/',
         routes: {
-          '/': (context) => const HomeScreen(),
-          '/config': (context) => const GameConfigScreen(),
-          '/presets': (context) => const PresetScreen(),
-          '/history': (context) => const HistoryScreen(),
-          '/players': (context) => const PlayerListScreen(),
+          '/': (context) => ChangeNotifierProvider(
+                create: (ctx) =>
+                    HomeViewModel(gameRepository: ctx.read()),
+                child: const HomeView(),
+              ),
+          '/config': (context) => ChangeNotifierProvider(
+                create: (ctx) => GameConfigViewModel(
+                  playerRepository: ctx.read(),
+                  gameRepository: ctx.read(),
+                  presetRepository: ctx.read(),
+                ),
+                child: const GameConfigView(),
+              ),
+          '/presets': (context) => ChangeNotifierProvider(
+                create: (ctx) =>
+                    PresetsViewModel(presetRepository: ctx.read()),
+                child: const PresetsView(),
+              ),
+          '/history': (context) => ChangeNotifierProvider(
+                create: (ctx) =>
+                    HistoryViewModel(gameRepository: ctx.read()),
+                child: const HistoryView(),
+              ),
+          '/players': (context) => ChangeNotifierProvider(
+                create: (ctx) =>
+                    PlayersViewModel(playerRepository: ctx.read()),
+                child: const PlayersView(),
+              ),
         },
         onGenerateRoute: (settings) {
           if (settings.name == '/score') {
-            final args = settings.arguments as String; // gameId
+            final gameId = settings.arguments as String;
             return MaterialPageRoute(
-              builder: (context) => ScoreScreen(gameId: args),
+              builder: (context) => ChangeNotifierProvider(
+                create: (ctx) => ScoreViewModel(
+                  gameId: gameId,
+                  gameRepository: ctx.read(),
+                  playerRepository: ctx.read(),
+                  calculateScoreUseCase: ctx.read(),
+                ),
+                child: const ScoreView(),
+              ),
             );
           }
           return null;
@@ -96,8 +161,7 @@ class LudoCountApp extends StatelessWidget {
 
     const bgColor = Color(0xFF2C343C);
     const surfaceColor = Color(0xFF37414A);
-    const primaryColor =
-        Color(0xFF66BB6A); // Utiliser le vert comme primaire par défaut
+    const primaryColor = Color(0xFF66BB6A);
 
     return base.copyWith(
       scaffoldBackgroundColor: bgColor,
@@ -109,7 +173,8 @@ class LudoCountApp extends StatelessWidget {
       ),
       cardTheme: CardThemeData(
         color: surfaceColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 2,
       ),
       colorScheme: base.colorScheme.copyWith(
@@ -121,8 +186,10 @@ class LudoCountApp extends StatelessWidget {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          padding:
+              const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          textStyle:
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(

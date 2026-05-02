@@ -1,29 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ludocount/providers/game_provider.dart';
-import 'package:ludocount/models/game_preset.dart';
-import 'package:ludocount/models/game.dart';
-import 'package:ludocount/models/player.dart';
+import 'package:ludocount/domain/use_cases/calculate_score_use_case.dart';
+import 'package:ludocount/data/models/game_preset.dart';
+import 'package:ludocount/data/models/game.dart';
+import 'package:ludocount/data/models/player.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 
 void main() {
-  late GameProvider gameProvider;
+  late CalculateScoreUseCase calculator;
   late Directory tempDir;
 
   setUpAll(() async {
     tempDir = Directory.systemTemp.createTempSync();
     Hive.init(tempDir.path);
-    
-    // Register adapters
+
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(GamePresetAdapter());
     if (!Hive.isAdapterRegistered(5)) Hive.registerAdapter(ScoringRuleAdapter());
     if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(GameTypeAdapter());
     if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(ScoreFieldDefinitionAdapter());
-    if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(GameAdapter());
-    if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(PlayerAdapter());
+    if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(PlayerAdapter());
+    if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(GameAdapter());
 
-    // Open boxes needed by GameProvider
     await Hive.openBox<GamePreset>('presets');
     await Hive.openBox<Player>('players');
     await Hive.openBox<Game>('games');
@@ -37,7 +35,7 @@ void main() {
   });
 
   setUp(() {
-    gameProvider = GameProvider();
+    calculator = CalculateScoreUseCase();
   });
 
   test('GamePreset should store minPlayers and maxPlayers', () async {
@@ -58,19 +56,13 @@ void main() {
     expect(retrieved.maxPlayers, 5);
   });
 
-  test('calculateDynamicScore should use playerCount variable', () {
-    final formula = 'playerCount * 10';
-    final inputs = {'playerCount': 4};
-    
-    final score = gameProvider.calculateDynamicScore(formula, inputs);
+  test('calculateDynamic should use playerCount variable', () {
+    final score = calculator.calculateDynamic('playerCount * 10', {'playerCount': 4});
     expect(score, 40);
   });
 
-  test('calculateDynamicScore should work with other variables and playerCount', () {
-    final formula = 'bid * playerCount';
-    final inputs = {'bid': 5, 'playerCount': 3};
-    
-    final score = gameProvider.calculateDynamicScore(formula, inputs);
+  test('calculateDynamic should work with other variables and playerCount', () {
+    final score = calculator.calculateDynamic('bid * playerCount', {'bid': 5, 'playerCount': 3});
     expect(score, 15);
   });
 }

@@ -1,28 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ludocount/models/game_preset.dart';
-import 'package:ludocount/services/preset_share_service.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hive/hive.dart';
-import 'dart:io';
+import 'package:ludocount/data/models/game_preset.dart';
+import 'package:ludocount/data/services/preset_share_service.dart';
 
 void main() {
-  late Directory tempDir;
-
-  setUpAll(() async {
-    tempDir = Directory.systemTemp.createTempSync();
-    Hive.init(tempDir.path);
-    if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(GamePresetAdapter());
-    if (!Hive.isAdapterRegistered(5)) Hive.registerAdapter(ScoringRuleAdapter());
-    if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(GameTypeAdapter());
-    if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(ScoreFieldDefinitionAdapter());
-  });
-
-  tearDownAll(() async {
-    if (tempDir.existsSync()) {
-      tempDir.deleteSync(recursive: true);
-    }
-  });
-
   test('GamePreset JSON serialization', () {
     final preset = GamePreset(
       id: 'test_id',
@@ -60,8 +40,6 @@ void main() {
 
     final code = PresetShareService.encodePreset(preset);
     expect(code, isNotEmpty);
-    
-    // Should be base64
     expect(RegExp(r'^[a-zA-Z0-9+/]+={0,2}$').hasMatch(code), isTrue);
 
     final decoded = PresetShareService.decodePreset(code);
