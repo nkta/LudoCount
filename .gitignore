@@ -50,3 +50,9 @@ local.properties
 
 # Sorties de test locales
 test_output.txt
+
+# Config locale Claude Code
+.claude/
+
+# Worktrees git locaux
+worktrees/
