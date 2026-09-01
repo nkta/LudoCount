@@ -131,6 +131,20 @@ class AppLocalizations {
       'updateErrorNoApk': 'Cette version ne propose pas d’APK à installer.',
       'updateErrorDownload': 'Le téléchargement a échoué.',
       'updateErrorInstall': 'L’installation n’a pas pu être lancée.',
+      'importFromFile': 'Importer depuis un fichier',
+      'exportToFile': 'Exporter dans un fichier',
+      'presetFilePickerTitle': 'Choisir un fichier de preset',
+      'presetFileUnreadable': 'Fichier illisible.',
+      'presetFileInvalid': 'Ce fichier ne contient pas de preset valide.',
+      'invalidPresetCode': 'Code invalide',
+      'presetFileShareSubject': 'Preset LudoCount : {title}',
+      'presetFileExportFailed': 'Échec de l’export du fichier.',
+      'presetImported': 'Preset « {title} » importé !',
+      'presetTitleTakenNotice':
+          'Un preset porte déjà ce nom : il sera ajouté sous « {title} ».',
+      'verify': 'Vérifier',
+      'addPresetToCollection':
+          'Voulez-vous ajouter ce preset à votre collection ?',
     },
     'en': {
       'appTitle': 'LudoCount',
@@ -241,6 +255,20 @@ class AppLocalizations {
       'updateErrorNoApk': 'This version has no APK to install.',
       'updateErrorDownload': 'The download failed.',
       'updateErrorInstall': 'The installation could not be started.',
+      'importFromFile': 'Import from a file',
+      'exportToFile': 'Export to a file',
+      'presetFilePickerTitle': 'Choose a preset file',
+      'presetFileUnreadable': 'This file cannot be read.',
+      'presetFileInvalid': 'This file does not contain a valid preset.',
+      'invalidPresetCode': 'Invalid code',
+      'presetFileShareSubject': 'LudoCount preset: {title}',
+      'presetFileExportFailed': 'File export failed.',
+      'presetImported': 'Preset “{title}” imported!',
+      'presetTitleTakenNotice':
+          'A preset already uses this name: it will be added as “{title}”.',
+      'verify': 'Verify',
+      'addPresetToCollection':
+          'Do you want to add this preset to your collection?',
     },
     'es': {
       'appTitle': 'LudoCount',
@@ -352,6 +380,20 @@ class AppLocalizations {
       'updateErrorNoApk': 'Esta versión no incluye ningún APK para instalar.',
       'updateErrorDownload': 'La descarga ha fallado.',
       'updateErrorInstall': 'No se pudo iniciar la instalación.',
+      'importFromFile': 'Importar desde un archivo',
+      'exportToFile': 'Exportar a un archivo',
+      'presetFilePickerTitle': 'Elegir un archivo de preset',
+      'presetFileUnreadable': 'No se puede leer este archivo.',
+      'presetFileInvalid': 'Este archivo no contiene un preset válido.',
+      'invalidPresetCode': 'Código inválido',
+      'presetFileShareSubject': 'Preset de LudoCount: {title}',
+      'presetFileExportFailed': 'Error al exportar el archivo.',
+      'presetImported': '¡Preset «{title}» importado!',
+      'presetTitleTakenNotice':
+          'Ya existe un preset con ese nombre: se añadirá como «{title}».',
+      'verify': 'Verificar',
+      'addPresetToCollection':
+          '¿Quieres añadir este preset a tu colección?',
     },
     'de': {
       'appTitle': 'LudoCount',
@@ -462,6 +504,20 @@ class AppLocalizations {
       'updateErrorNoApk': 'Diese Version enthält kein APK zur Installation.',
       'updateErrorDownload': 'Der Download ist fehlgeschlagen.',
       'updateErrorInstall': 'Die Installation konnte nicht gestartet werden.',
+      'importFromFile': 'Aus einer Datei importieren',
+      'exportToFile': 'In eine Datei exportieren',
+      'presetFilePickerTitle': 'Preset-Datei auswählen',
+      'presetFileUnreadable': 'Diese Datei kann nicht gelesen werden.',
+      'presetFileInvalid': 'Diese Datei enthält kein gültiges Preset.',
+      'invalidPresetCode': 'Ungültiger Code',
+      'presetFileShareSubject': 'LudoCount-Preset: {title}',
+      'presetFileExportFailed': 'Export der Datei fehlgeschlagen.',
+      'presetImported': 'Preset „{title}“ importiert!',
+      'presetTitleTakenNotice':
+          'Ein Preset trägt diesen Namen bereits: Es wird als „{title}“ hinzugefügt.',
+      'verify': 'Prüfen',
+      'addPresetToCollection':
+          'Möchten Sie dieses Preset zu Ihrer Sammlung hinzufügen?',
     },
   };
 
@@ -585,6 +641,21 @@ class AppLocalizations {
   String get updateErrorNoApk => _t('updateErrorNoApk');
   String get updateErrorDownload => _t('updateErrorDownload');
   String get updateErrorInstall => _t('updateErrorInstall');
+  String get importFromFile => _t('importFromFile');
+  String get exportToFile => _t('exportToFile');
+  String get presetFilePickerTitle => _t('presetFilePickerTitle');
+  String get presetFileUnreadable => _t('presetFileUnreadable');
+  String get presetFileInvalid => _t('presetFileInvalid');
+  String get invalidPresetCode => _t('invalidPresetCode');
+  String presetFileShareSubject(String title) =>
+      _t('presetFileShareSubject').replaceFirst('{title}', title);
+  String get presetFileExportFailed => _t('presetFileExportFailed');
+  String presetImported(String title) =>
+      _t('presetImported').replaceFirst('{title}', title);
+  String presetTitleTakenNotice(String title) =>
+      _t('presetTitleTakenNotice').replaceFirst('{title}', title);
+  String get verify => _t('verify');
+  String get addPresetToCollection => _t('addPresetToCollection');
 }
 
 class _AppLocalizationsDelegate

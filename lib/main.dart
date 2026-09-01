@@ -19,6 +19,8 @@ import 'data/services/player_service.dart';
 import 'data/services/preset_service.dart';
 import 'domain/use_cases/calculate_score_use_case.dart';
 import 'domain/use_cases/check_for_update_use_case.dart';
+import 'domain/use_cases/export_preset_file_use_case.dart';
+import 'domain/use_cases/import_preset_file_use_case.dart';
 import 'domain/use_cases/seed_presets_use_case.dart';
 import 'l10n/app_localizations.dart';
 import 'ui/features/app_update/view_models/app_update_view_model.dart';
@@ -110,6 +112,8 @@ class LudoCountApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: gameRepository),
         ChangeNotifierProvider.value(value: presetRepository),
         Provider.value(value: calculateScoreUseCase),
+        Provider(create: (_) => ExportPresetFileUseCase()),
+        Provider(create: (_) => ImportPresetFileUseCase()),
         ChangeNotifierProvider(create: (_) => DiceViewModel()),
         // Vérifié une fois au lancement : la page d'accueil signale ensuite
         // une version plus récente par une pastille.
@@ -156,8 +160,11 @@ class LudoCountApp extends StatelessWidget {
                 child: const GameConfigView(),
               ),
           '/presets': (context) => ChangeNotifierProvider(
-                create: (ctx) =>
-                    PresetsViewModel(presetRepository: ctx.read()),
+                create: (ctx) => PresetsViewModel(
+                  presetRepository: ctx.read(),
+                  exportPresetFileUseCase: ctx.read(),
+                  importPresetFileUseCase: ctx.read(),
+                ),
                 child: const PresetsView(),
               ),
           '/history': (context) => ChangeNotifierProvider(

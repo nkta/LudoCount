@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:ludocount/data/models/game_preset.dart';
 import 'package:ludocount/data/repositories/preset_repository.dart';
+import 'package:ludocount/domain/use_cases/import_preset_file_use_case.dart';
 import 'package:ludocount/l10n/app_localizations.dart';
 import 'package:ludocount/ui/features/expert_preset_config/view_models/expert_preset_config_view_model.dart';
 import 'package:ludocount/ui/features/expert_preset_config/views/expert_preset_config_view.dart';
@@ -203,6 +204,7 @@ class PresetsView extends StatelessWidget {
 
   void _showImportDialog(
       BuildContext context, PresetsViewModel vm) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
@@ -231,12 +233,19 @@ class PresetsView extends StatelessWidget {
               ),
               maxLines: 3,
             ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () =>
+                  _importFromFile(context, ctx, vm),
+              icon: const Icon(Icons.folder_open),
+              label: Text(l10n.importFromFile),
+            ),
           ],
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Annuler')),
+              child: Text(l10n.cancel)),
           ElevatedButton(
             onPressed: () {
               try {
@@ -247,18 +256,44 @@ class PresetsView extends StatelessWidget {
                 _showImportPreviewDialog(context, vm, preset);
               } catch (_) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Code invalide')));
+                    SnackBar(content: Text(l10n.invalidPresetCode)));
               }
             },
-            child: const Text('Vérifier'),
+            child: Text(l10n.verify),
           ),
         ],
       ),
     );
   }
 
+  /// Sélectionne un fichier `.ludopreset` et enchaîne sur l'aperçu.
+  ///
+  /// [context] est celui de la page (il survit à la fermeture de la boîte de
+  /// dialogue d'import), [dialogContext] celui de cette boîte.
+  Future<void> _importFromFile(BuildContext context,
+      BuildContext dialogContext, PresetsViewModel vm) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final preset =
+          await vm.importPresetFromFile(dialogTitle: l10n.presetFilePickerTitle);
+      if (preset == null) return;
+      if (dialogContext.mounted) Navigator.pop(dialogContext);
+      if (!context.mounted) return;
+      _showImportPreviewDialog(context, vm, preset);
+    } on PresetFileImportException catch (e) {
+      messenger.showSnackBar(SnackBar(
+        content: Text(e.error == PresetFileImportError.unreadableFile
+            ? l10n.presetFileUnreadable
+            : l10n.presetFileInvalid),
+      ));
+    }
+  }
+
   void _showImportPreviewDialog(
       BuildContext context, PresetsViewModel vm, GamePreset preset) {
+    final l10n = AppLocalizations.of(context);
+    final targetTitle = vm.availableTitle(preset.title);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -277,22 +312,27 @@ class PresetsView extends StatelessWidget {
               Text('Tours max: ${preset.targetRounds}'),
             if (preset.fields != null)
               Text('Champs: ${preset.fields!.map((f) => f.label).join(", ")}'),
+            if (targetTitle != preset.title) ...[
+              const SizedBox(height: 8),
+              Text(l10n.presetTitleTakenNotice(targetTitle),
+                  style: TextStyle(
+                      color: Theme.of(ctx).colorScheme.error)),
+            ],
             const SizedBox(height: 16),
-            const Text(
-                'Voulez-vous ajouter ce preset à votre collection ?'),
+            Text(l10n.addPresetToCollection),
           ],
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Annuler')),
+              child: Text(l10n.cancel)),
           ElevatedButton(
-            onPressed: () {
-              vm.importPreset(preset);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Preset "${preset.title}" importé !')));
-              Navigator.pop(ctx);
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final imported = await vm.importPreset(preset);
+              messenger.showSnackBar(SnackBar(
+                  content: Text(l10n.presetImported(imported.title))));
+              if (ctx.mounted) Navigator.pop(ctx);
             },
             child: const Text('Importer'),
           ),
@@ -530,6 +570,7 @@ class _PresetCard extends StatelessWidget {
   }
 
   void _showShareDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final code = vm.encodePreset(preset);
     showDialog(
       context: context,
@@ -588,7 +629,7 @@ class _PresetCard extends StatelessWidget {
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Fermer')),
-            ElevatedButton.icon(
+            TextButton.icon(
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: code));
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -599,9 +640,30 @@ class _PresetCard extends StatelessWidget {
               icon: const Icon(Icons.copy),
               label: const Text('Copier'),
             ),
+            ElevatedButton.icon(
+              onPressed: () => _exportToFile(context, ctx),
+              icon: const Icon(Icons.upload_file),
+              label: Text(l10n.exportToFile),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  /// Écrit le preset dans un fichier `.ludopreset` et le propose au partage
+  /// système (mail, messagerie, stockage...).
+  Future<void> _exportToFile(
+      BuildContext context, BuildContext dialogContext) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await vm.exportPresetToFile(preset,
+          subject: l10n.presetFileShareSubject(preset.title));
+      if (dialogContext.mounted) Navigator.pop(dialogContext);
+    } catch (_) {
+      messenger.showSnackBar(
+          SnackBar(content: Text(l10n.presetFileExportFailed)));
+    }
   }
 }

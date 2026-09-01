@@ -16,7 +16,11 @@ LudoCount est une application Flutter moderne conçue pour faciliter le comptage
   - Définissez des formules de score complexes.
   - Utilisez des conditions logiques pour le calcul des points.
   - Configurez des étiquettes de manches personnalisées.
-- **Partage** : Exportez et importez vos presets via QR Code.
+- **Partage** : Exportez et importez vos presets via QR Code ou par fichier.
+
+#### Format d’échange `.ludopreset`
+
+Un preset exporté dans un fichier porte l’extension **`.ludopreset`**. Le fichier est un simple texte UTF-8 qui contient exactement le même code que le QR Code : le JSON du preset, compressé en gzip puis encodé en base64. Il peut donc être envoyé par mail ou messagerie, ce qui dépanne quand un preset est trop volumineux pour un QR Code, puis réimporté depuis l’écran *Presets* avec « Importer depuis un fichier ». Les espaces et retours à la ligne autour du code sont ignorés, et c’est le contenu — pas l’extension — qui décide de la validité à l’import.
 
 ### 👥 Gestion des Joueurs
 - Créez et gérez une liste de joueurs pour un accès rapide lors du lancement d'une partie.
@@ -33,6 +37,7 @@ Ce projet est développé avec **Flutter** et utilise plusieurs packages clés :
 - **Base de données locale** : `hive`
 - **Internationalisation** : `flutter_localizations`, `intl`
 - **QR Code** : `qr_flutter`, `mobile_scanner`
+- **Partage par fichier** : `file_picker` (sélection), `share_plus` (partage système), `path_provider` (fichier temporaire)
 - **Calcul** : `expressions` (pour l'évaluation des formules dynamiques)
 - **Mise à jour in-app** : `http`, `package_info_plus`, `open_filex`
 

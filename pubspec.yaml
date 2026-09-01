@@ -26,11 +26,16 @@ dependencies:
   http: ^1.6.0
   # Lit à l'exécution la version déclarée dans pubspec.yaml (versionName natif).
   package_info_plus: ^10.2.1
-  # Dossier de cache où écrire l'APK téléchargé (déjà présente en transitive).
+  # Dossier de cache où écrire l'APK téléchargé et les presets à partager.
   path_provider: ^2.1.5
   # Ouvre l'APK via un FileProvider (content://) pour lancer l'installeur
   # système ; url_launcher ne peut pas ouvrir un file:// depuis Android 7.
   open_filex: ^4.7.0
+  # Sélecteur de fichiers natif pour l'import d'un preset ; passe par le SAF
+  # sur Android, d'où la lecture via PlatformFile plutôt que par chemin.
+  file_picker: ^12.1.3
+  # Feuille de partage système pour l'export d'un preset en .ludopreset.
+  share_plus: ^13.0.0
 
 dev_dependencies:
   flutter_test:
