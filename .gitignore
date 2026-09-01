@@ -31,6 +31,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+# Gradle ecrit aussi ici, hors du /build/ redirige par android/build.gradle.kts
+android/build/
 /coverage/
 
 # Symbolication related
