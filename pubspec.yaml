@@ -21,6 +21,16 @@ dependencies:
   qr_flutter: ^4.1.0
   mobile_scanner: ^7.1.3
   url_launcher: ^6.3.2
+  # Mise à jour in-app : appels à l'API GitHub Releases et téléchargement
+  # streamé de l'APK (progression) ; testable via MockClient (http/testing).
+  http: ^1.6.0
+  # Lit à l'exécution la version déclarée dans pubspec.yaml (versionName natif).
+  package_info_plus: ^10.2.1
+  # Dossier de cache où écrire l'APK téléchargé (déjà présente en transitive).
+  path_provider: ^2.1.5
+  # Ouvre l'APK via un FileProvider (content://) pour lancer l'installeur
+  # système ; url_launcher ne peut pas ouvrir un file:// depuis Android 7.
+  open_filex: ^4.7.0
 
 dev_dependencies:
   flutter_test:

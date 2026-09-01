@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:label="LudoCount"
         android:name="${applicationName}"
@@ -43,4 +44,27 @@
         </intent>
     </queries>
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Mise à jour in-app : interrogation des GitHub Releases puis
+         téléchargement de l'APK de la dernière version. Cette permission
+         n'était déclarée que dans les manifestes debug/profile. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Permet de passer l'APK téléchargé à l'installeur du système.
+         L'utilisateur doit en plus autoriser explicitement LudoCount dans
+         Paramètres > Applications > Installer des applications inconnues ;
+         le système ouvre cet écran de lui-même à la première tentative. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <!-- open_filex déclare ces permissions pour ouvrir des fichiers média.
+         LudoCount ne lui donne que l'APK écrit dans son propre cache : on les
+         retire pour ne rien demander d'inutile à l'utilisateur. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"
+        tools:node="remove" />
 </manifest>

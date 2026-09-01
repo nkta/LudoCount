@@ -108,6 +108,29 @@ class AppLocalizations {
       'totalPlayers': 'Joueurs uniques',
       'mostActivePlayer': 'Joueur le plus actif',
       'bestWinRate': 'Meilleur taux de victoire',
+      'updateTitle': 'Mise à jour',
+      'updateCheck': 'Rechercher une mise à jour',
+      'updateChecking': 'Recherche d’une mise à jour…',
+      'updateUpToDate': 'LudoCount est à jour.',
+      'updateCurrentVersion': 'Version installée : {version}',
+      'updateAvailable': 'Version {version} disponible',
+      'updateSize': '{size} Mo à télécharger',
+      'updateNotes': 'Nouveautés',
+      'updateDownload': 'Télécharger',
+      'updateDownloading': 'Téléchargement en cours…',
+      'updateInstall': 'Installer',
+      'updateInstallHint':
+          'Le système vous demandera d’autoriser l’installation '
+              'd’applications depuis LudoCount.',
+      'updateOpenPage': 'Ouvrir la page de la version',
+      'updateRetry': 'Réessayer',
+      'updateClose': 'Fermer',
+      'updateErrorNetwork':
+          'Impossible de contacter GitHub. Vérifiez votre connexion.',
+      'updateErrorNoRelease': 'Aucune version n’a encore été publiée.',
+      'updateErrorNoApk': 'Cette version ne propose pas d’APK à installer.',
+      'updateErrorDownload': 'Le téléchargement a échoué.',
+      'updateErrorInstall': 'L’installation n’a pas pu être lancée.',
     },
     'en': {
       'appTitle': 'LudoCount',
@@ -197,6 +220,27 @@ class AppLocalizations {
       'totalPlayers': 'Total Players',
       'mostActivePlayer': 'Most Active Player',
       'bestWinRate': 'Best Win Rate',
+      'updateTitle': 'Update',
+      'updateCheck': 'Check for updates',
+      'updateChecking': 'Looking for an update…',
+      'updateUpToDate': 'LudoCount is up to date.',
+      'updateCurrentVersion': 'Installed version: {version}',
+      'updateAvailable': 'Version {version} available',
+      'updateSize': '{size} MB to download',
+      'updateNotes': 'What’s new',
+      'updateDownload': 'Download',
+      'updateDownloading': 'Downloading…',
+      'updateInstall': 'Install',
+      'updateInstallHint':
+          'Android will ask you to allow installing apps from LudoCount.',
+      'updateOpenPage': 'Open the release page',
+      'updateRetry': 'Retry',
+      'updateClose': 'Close',
+      'updateErrorNetwork': 'Could not reach GitHub. Check your connection.',
+      'updateErrorNoRelease': 'No version has been published yet.',
+      'updateErrorNoApk': 'This version has no APK to install.',
+      'updateErrorDownload': 'The download failed.',
+      'updateErrorInstall': 'The installation could not be started.',
     },
     'es': {
       'appTitle': 'LudoCount',
@@ -285,6 +329,29 @@ class AppLocalizations {
       'totalPlayers': 'Jugadores totales',
       'mostActivePlayer': 'Jugador más activo',
       'bestWinRate': 'Mejor tasa de victoria',
+      'updateTitle': 'Actualización',
+      'updateCheck': 'Buscar actualizaciones',
+      'updateChecking': 'Buscando una actualización…',
+      'updateUpToDate': 'LudoCount está actualizado.',
+      'updateCurrentVersion': 'Versión instalada: {version}',
+      'updateAvailable': 'Versión {version} disponible',
+      'updateSize': '{size} MB para descargar',
+      'updateNotes': 'Novedades',
+      'updateDownload': 'Descargar',
+      'updateDownloading': 'Descargando…',
+      'updateInstall': 'Instalar',
+      'updateInstallHint':
+          'Android te pedirá permiso para instalar aplicaciones '
+              'desde LudoCount.',
+      'updateOpenPage': 'Abrir la página de la versión',
+      'updateRetry': 'Reintentar',
+      'updateClose': 'Cerrar',
+      'updateErrorNetwork':
+          'No se pudo contactar con GitHub. Comprueba tu conexión.',
+      'updateErrorNoRelease': 'Todavía no se ha publicado ninguna versión.',
+      'updateErrorNoApk': 'Esta versión no incluye ningún APK para instalar.',
+      'updateErrorDownload': 'La descarga ha fallado.',
+      'updateErrorInstall': 'No se pudo iniciar la instalación.',
     },
     'de': {
       'appTitle': 'LudoCount',
@@ -373,6 +440,28 @@ class AppLocalizations {
       'totalPlayers': 'Gesamtspieler',
       'mostActivePlayer': 'Aktivster Spieler',
       'bestWinRate': 'Beste Gewinnrate',
+      'updateTitle': 'Aktualisierung',
+      'updateCheck': 'Nach Updates suchen',
+      'updateChecking': 'Suche nach einem Update…',
+      'updateUpToDate': 'LudoCount ist aktuell.',
+      'updateCurrentVersion': 'Installierte Version: {version}',
+      'updateAvailable': 'Version {version} verfügbar',
+      'updateSize': '{size} MB zum Herunterladen',
+      'updateNotes': 'Neuerungen',
+      'updateDownload': 'Herunterladen',
+      'updateDownloading': 'Wird heruntergeladen…',
+      'updateInstall': 'Installieren',
+      'updateInstallHint':
+          'Android fragt nach der Erlaubnis, Apps aus LudoCount '
+              'zu installieren.',
+      'updateOpenPage': 'Release-Seite öffnen',
+      'updateRetry': 'Erneut versuchen',
+      'updateClose': 'Schließen',
+      'updateErrorNetwork': 'GitHub ist nicht erreichbar. Prüfe deine Verbindung.',
+      'updateErrorNoRelease': 'Es wurde noch keine Version veröffentlicht.',
+      'updateErrorNoApk': 'Diese Version enthält kein APK zur Installation.',
+      'updateErrorDownload': 'Der Download ist fehlgeschlagen.',
+      'updateErrorInstall': 'Die Installation konnte nicht gestartet werden.',
     },
   };
 
@@ -473,6 +562,29 @@ class AppLocalizations {
   String get totalPlayers => _t('totalPlayers');
   String get mostActivePlayer => _t('mostActivePlayer');
   String get bestWinRate => _t('bestWinRate');
+  String get updateTitle => _t('updateTitle');
+  String get updateCheck => _t('updateCheck');
+  String get updateChecking => _t('updateChecking');
+  String get updateUpToDate => _t('updateUpToDate');
+  String updateCurrentVersion(String version) =>
+      _t('updateCurrentVersion').replaceFirst('{version}', version);
+  String updateAvailable(String version) =>
+      _t('updateAvailable').replaceFirst('{version}', version);
+  String updateSize(String size) =>
+      _t('updateSize').replaceFirst('{size}', size);
+  String get updateNotes => _t('updateNotes');
+  String get updateDownload => _t('updateDownload');
+  String get updateDownloading => _t('updateDownloading');
+  String get updateInstall => _t('updateInstall');
+  String get updateInstallHint => _t('updateInstallHint');
+  String get updateOpenPage => _t('updateOpenPage');
+  String get updateRetry => _t('updateRetry');
+  String get updateClose => _t('updateClose');
+  String get updateErrorNetwork => _t('updateErrorNetwork');
+  String get updateErrorNoRelease => _t('updateErrorNoRelease');
+  String get updateErrorNoApk => _t('updateErrorNoApk');
+  String get updateErrorDownload => _t('updateErrorDownload');
+  String get updateErrorInstall => _t('updateErrorInstall');
 }
 
 class _AppLocalizationsDelegate
