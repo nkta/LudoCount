@@ -70,9 +70,24 @@ La fonctionnalité est masquée hors Android, seule plateforme où l'installatio
 
 ### Publier une version
 
-1. Incrémenter `version:` dans `pubspec.yaml` (par exemple `1.1.0+2`).
-2. Construire l'APK : `flutter build apk --release`.
-3. Créer une release GitHub dont le **tag** porte le numéro de version (`v1.1.0` ou `1.1.0`) et y **attacher l'APK** en asset. Le corps de la release est affiché comme notes de version dans l'application.
+La publication est automatisée par le workflow `.github/workflows/release-apk.yml`.
+
+1. Incrémenter `version:` dans `pubspec.yaml` (par exemple `1.1.0+2`), puis commiter.
+2. Poser un tag portant le même numéro et le pousser : `git tag v1.1.0 && git push origin v1.1.0`.
+3. Le workflow lance les tests, construit l'APK signé, crée la release et y attache l'asset. Les notes de version sont générées à partir des commits, et affichées dans l'application.
+
+Le job refuse de publier si le tag et `version:` divergent, puisque l'application compare précisément ces deux valeurs. Il peut aussi être relancé à la main depuis l'onglet **Actions**, en indiquant un tag existant ; l'APK attaché est alors remplacé.
+
+#### Secrets à configurer
+
+| Secret | Contenu |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | Le keystore encodé : `base64 -w0 android/app/upload-keystore.jks` |
+| `ANDROID_KEYSTORE_PASSWORD` | Le `storePassword` de `android/key.properties` |
+| `ANDROID_KEY_ALIAS` | Le `keyAlias` (`upload` par défaut) |
+| `ANDROID_KEY_PASSWORD` | Le `keyPassword` |
+
+Sans eux le job s'arrête avant de construire : Gradle se rabattrait sur la clé de debug, et Android refuserait alors de mettre à jour une application déjà installée.
 
 L'APK doit être signé avec la même clé que la version déjà installée, faute de quoi Android refusera la mise à jour.
 

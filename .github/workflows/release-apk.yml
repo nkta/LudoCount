@@ -1,0 +1,140 @@
+name: APK de release
+
+# Publie un APK signé et l'attache à une GitHub Release.
+#
+# La mise à jour in-app lit /releases/latest et retient le PREMIER asset
+# dont le nom finit par .apk : ce workflow produit donc un APK universel
+# unique. Ne pas passer à --split-per-abi sans adapter AppRelease.fromJson.
+#
+# La version affichée à l'utilisateur est lue dans le tag (v1.2.3), puis
+# comparée au `version:` de pubspec.yaml : les deux doivent concorder, le
+# job échoue sinon.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag à publier (ex. v1.0.1). Doit exister."
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Construire et publier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer les sources
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Installer le JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Installer Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.0'
+          channel: stable
+          cache: true
+
+      - name: Vérifier que le tag correspond à pubspec.yaml
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          tag_version="${tag#v}"
+          pubspec_version="$(grep -m1 '^version:' pubspec.yaml | awk '{print $2}')"
+          # pubspec porte major.minor.patch+build, le tag seulement la partie publique.
+          if [ "$tag_version" != "${pubspec_version%%+*}" ]; then
+            echo "Le tag $tag annonce $tag_version, pubspec.yaml déclare ${pubspec_version%%+*}." >&2
+            echo "Alignez les deux avant de publier : la mise à jour in-app compare ces valeurs." >&2
+            exit 1
+          fi
+          echo "version=$tag_version" >> "$GITHUB_ENV"
+          echo "Version publiée : $tag_version"
+
+      - name: Restaurer le keystore de signature
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KEYSTORE_BASE64:-}" ]; then
+            echo "Le secret ANDROID_KEYSTORE_BASE64 est absent." >&2
+            echo "Sans lui, Gradle signerait avec la clé de debug : Android refuserait" >&2
+            echo "la mise à jour d'une application déjà installée en release." >&2
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          # storeFile est résolu depuis android/app, comme en local.
+          cat > android/key.properties <<EOF
+          storeFile=upload-keystore.jks
+          storePassword=$STORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+
+      - name: Installer les dépendances
+        run: flutter pub get
+
+      - name: Lancer les tests
+        run: flutter test
+
+      - name: Construire l'APK
+        run: flutter build apk --release
+
+      - name: Renommer l'APK
+        run: |
+          set -euo pipefail
+          # Le nom produit depend de la config Gradle du projet : on retient
+          # le seul APK de release present plutot que de le coder en dur.
+          built=build/app/outputs/flutter-apk/app-release.apk
+          if [ ! -f "$built" ]; then
+            # Filet de securite si la config Gradle renomme la sortie.
+            built="$(find build/app/outputs/flutter-apk -maxdepth 1 -name '*release*.apk' \
+                     -newer pubspec.yaml | head -n1)"
+          fi
+          if [ -z "$built" ]; then
+            echo "Aucun APK de release produit sous build/app/outputs/flutter-apk." >&2
+            ls -la build/app/outputs/flutter-apk >&2 || true
+            exit 1
+          fi
+          mv "$built" "build/app/outputs/flutter-apk/LudoCount-${{ env.version }}.apk"
+
+      - name: Effacer les secrets du disque
+        if: always()
+        run: rm -f android/key.properties android/app/upload-keystore.jks
+
+      - name: Publier la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          apk="build/app/outputs/flutter-apk/LudoCount-${{ env.version }}.apk"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            # Relance sur un tag déjà publié : on remplace l'APK attaché.
+            gh release upload "$tag" "$apk" --clobber
+          else
+            gh release create "$tag" "$apk" \
+              --title "LudoCount ${{ env.version }}" \
+              --generate-notes
+          fi
+
+      - name: Conserver l'APK comme artéfact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LudoCount-${{ env.version }}
+          path: build/app/outputs/flutter-apk/LudoCount-${{ env.version }}.apk
+          retention-days: 30
