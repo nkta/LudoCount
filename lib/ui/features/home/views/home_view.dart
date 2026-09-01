@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ludocount/l10n/app_localizations.dart';
+import 'package:ludocount/ui/features/app_update/view_models/app_update_view_model.dart';
+import 'package:ludocount/ui/features/app_update/views/app_update_dialog.dart';
 import 'package:ludocount/ui/features/home/view_models/home_view_model.dart';
 import 'package:ludocount/ui/features/dice/views/dice_roll_dialog.dart';
 
@@ -12,7 +14,10 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      appBar: AppBar(
+        title: Text(l10n.appTitle),
+        actions: [_buildUpdateAction(l10n)],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -65,6 +70,28 @@ class HomeView extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  /// Bouton de mise à jour, surmonté d'une pastille lorsqu'une version plus
+  /// récente a été trouvée. Masqué hors Android, seule plateforme où
+  /// l'installation d'un APK est possible.
+  Widget _buildUpdateAction(AppLocalizations l10n) {
+    return Consumer<AppUpdateViewModel>(
+      builder: (context, viewModel, child) {
+        if (!viewModel.isSupportedPlatform) return const SizedBox.shrink();
+        return IconButton(
+          tooltip: l10n.updateCheck,
+          icon: Badge(
+            isLabelVisible: viewModel.isUpdateAvailable,
+            child: const Icon(Icons.system_update),
+          ),
+          onPressed: () => showDialog(
+            context: context,
+            builder: (_) => const AppUpdateDialog(),
+          ),
+        );
+      },
     );
   }
 

@@ -23,6 +23,7 @@ LudoCount est une application Flutter moderne conçue pour faciliter le comptage
 
 ### 🎲 Outils
 - **Lanceur de Dés** : Un outil intégré pour lancer des dés virtuels si vous en manquez.
+- **Mise à Jour Intégrée** (Android) : L'application vérifie les GitHub Releases du dépôt et propose d'installer la dernière version sans passer par un store.
 
 ## 🛠 Technologies Utilisées
 
@@ -33,6 +34,7 @@ Ce projet est développé avec **Flutter** et utilise plusieurs packages clés :
 - **Internationalisation** : `flutter_localizations`, `intl`
 - **QR Code** : `qr_flutter`, `mobile_scanner`
 - **Calcul** : `expressions` (pour l'évaluation des formules dynamiques)
+- **Mise à jour in-app** : `http`, `package_info_plus`, `open_filex`
 
 ## 📱 Installation
 
@@ -54,6 +56,46 @@ Ce projet est développé avec **Flutter** et utilise plusieurs packages clés :
     ```bash
     flutter run
     ```
+
+## 🔄 Mise à jour depuis l'application (Android)
+
+LudoCount interroge les [GitHub Releases](https://github.com/nkta/LudoCount/releases) du dépôt, compare le tag de la dernière version publiée au champ `version:` de `pubspec.yaml`, et propose de télécharger l'APK de cette version puis de lancer l'installeur du système. La vérification a lieu une fois au lancement : une pastille apparaît alors sur l'icône de mise à jour de l'écran d'accueil, qui ouvre le détail de la version.
+
+La fonctionnalité est masquée hors Android, seule plateforme où l'installation d'un APK est possible.
+
+### Publier une version
+
+1. Incrémenter `version:` dans `pubspec.yaml` (par exemple `1.1.0+2`).
+2. Construire l'APK : `flutter build apk --release`.
+3. Créer une release GitHub dont le **tag** porte le numéro de version (`v1.1.0` ou `1.1.0`) et y **attacher l'APK** en asset. Le corps de la release est affiché comme notes de version dans l'application.
+
+L'APK doit être signé avec la même clé que la version déjà installée, faute de quoi Android refusera la mise à jour.
+
+Publiez un **APK universel** (`flutter build apk --release`) : l'application retient le premier asset `.apk` de la release, sans distinguer les architectures. Une release construite avec `--split-per-abi` exposerait plusieurs APK dont un seul convient à l'appareil.
+
+Les cas dégradés sont gérés : sans réseau l'application invite à vérifier la connexion, sans release publiée elle l'indique, et une release sans asset `.apk` renvoie vers sa page GitHub. Un téléchargement interrompu ou incomplet est effacé du cache et peut être relancé.
+
+### Permissions Android
+
+| Permission | Rôle |
+| --- | --- |
+| `INTERNET` | Interroger l'API GitHub et télécharger l'APK. Elle n'était déclarée que dans les manifestes `debug` et `profile` : elle manquait donc en `release`. |
+| `REQUEST_INSTALL_PACKAGES` | Remettre l'APK téléchargé à l'installeur du système. |
+
+`REQUEST_INSTALL_PACKAGES` ne suffit pas à elle seule : à la première tentative, Android ouvre l'écran « Installer des applications inconnues » pour que l'utilisateur autorise explicitement LudoCount.
+
+L'APK est écrit dans le cache privé de l'application et exposé à l'installeur en `content://` par le `FileProvider` de `open_filex`. Les permissions média que ce paquet déclare (`READ_EXTERNAL_STORAGE`, `READ_MEDIA_*`) sont retirées via `tools:node="remove"` dans `android/app/src/main/AndroidManifest.xml`, l'application n'ouvrant que le fichier qu'elle a elle-même écrit.
+
+> ⚠️ Google Play interdit qu'une application se mette à jour par un APK téléchargé hors du store. Si LudoCount y est publié un jour, cette fonctionnalité devra être désactivée dans la variante destinée au Play Store.
+
+### Dépendances ajoutées
+
+| Paquet | Justification |
+| --- | --- |
+| `http` | Appel à l'API GitHub et téléchargement streamé de l'APK avec progression ; testable via `MockClient` sans réseau. |
+| `package_info_plus` | Lecture à l'exécution de la version compilée (`versionName` / `versionCode`), seul reflet fiable du champ `version:` de `pubspec.yaml`. |
+| `path_provider` | Répertoire de cache où écrire l'APK. Déjà présente en dépendance transitive, simplement promue en dépendance directe. |
+| `open_filex` | Ouverture de l'APK via un `FileProvider` : `url_launcher` ne peut pas ouvrir un `file://` depuis Android 7. |
 
 ## ☕ Soutenir le projet
 

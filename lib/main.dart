@@ -7,15 +7,21 @@ import 'package:provider/provider.dart';
 import 'data/models/game.dart';
 import 'data/models/game_preset.dart';
 import 'data/models/player.dart';
+import 'data/repositories/app_update_repository.dart';
 import 'data/repositories/game_repository.dart';
 import 'data/repositories/player_repository.dart';
 import 'data/repositories/preset_repository.dart';
+import 'data/services/app_info_service.dart';
+import 'data/services/app_installer_service.dart';
 import 'data/services/game_service.dart';
+import 'data/services/github_release_service.dart';
 import 'data/services/player_service.dart';
 import 'data/services/preset_service.dart';
 import 'domain/use_cases/calculate_score_use_case.dart';
+import 'domain/use_cases/check_for_update_use_case.dart';
 import 'domain/use_cases/seed_presets_use_case.dart';
 import 'l10n/app_localizations.dart';
+import 'ui/features/app_update/view_models/app_update_view_model.dart';
 import 'ui/features/dice/view_models/dice_view_model.dart';
 import 'ui/features/game_config/view_models/game_config_view_model.dart';
 import 'ui/features/game_config/views/game_config_view.dart';
@@ -57,7 +63,14 @@ void main() async {
   final playerRepository = PlayerRepository(playerService: playerService);
   final gameRepository = GameRepository(gameService: gameService);
   final presetRepository = PresetRepository(presetService: presetService);
+  final appUpdateRepository = AppUpdateRepository(
+    releaseService: GithubReleaseService(),
+    appInfoService: AppInfoService(),
+    installerService: AppInstallerService(),
+  );
   final calculateScoreUseCase = CalculateScoreUseCase();
+  final checkForUpdateUseCase =
+      CheckForUpdateUseCase(appUpdateRepository: appUpdateRepository);
 
   await SeedPresetsUseCase(presetRepository: presetRepository).call();
 
@@ -65,7 +78,9 @@ void main() async {
     playerRepository: playerRepository,
     gameRepository: gameRepository,
     presetRepository: presetRepository,
+    appUpdateRepository: appUpdateRepository,
     calculateScoreUseCase: calculateScoreUseCase,
+    checkForUpdateUseCase: checkForUpdateUseCase,
   ));
 }
 
@@ -75,13 +90,17 @@ class LudoCountApp extends StatelessWidget {
     required this.playerRepository,
     required this.gameRepository,
     required this.presetRepository,
+    required this.appUpdateRepository,
     required this.calculateScoreUseCase,
+    required this.checkForUpdateUseCase,
   });
 
   final PlayerRepository playerRepository;
   final GameRepository gameRepository;
   final PresetRepository presetRepository;
+  final AppUpdateRepository appUpdateRepository;
   final CalculateScoreUseCase calculateScoreUseCase;
+  final CheckForUpdateUseCase checkForUpdateUseCase;
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +111,23 @@ class LudoCountApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: presetRepository),
         Provider.value(value: calculateScoreUseCase),
         ChangeNotifierProvider(create: (_) => DiceViewModel()),
+        // Vérifié une fois au lancement : la page d'accueil signale ensuite
+        // une version plus récente par une pastille.
+        ChangeNotifierProvider(
+          create: (_) {
+            final viewModel = AppUpdateViewModel(
+              appUpdateRepository: appUpdateRepository,
+              checkForUpdateUseCase: checkForUpdateUseCase,
+            );
+            // La vérification notifie ses écouteurs dès son premier
+            // changement d'état : on attend le premier frame pour ne pas
+            // notifier pendant la construction de l'arbre.
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => viewModel.checkForUpdate(),
+            );
+            return viewModel;
+          },
+        ),
       ],
       child: MaterialApp(
         onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
